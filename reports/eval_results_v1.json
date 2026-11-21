@@ -1,0 +1,2355 @@
+{
+  "model": "qwen/qwen3.8-27b",
+  "prompt_version": "v1",
+  "summary": {
+    "fields": {
+      "is_invoice": {
+        "correct": 10,
+        "n": 10,
+        "accuracy": 1.0,
+        "error_types": {}
+      },
+      "vendor": {
+        "correct": 9,
+        "n": 9,
+        "accuracy": 1.0,
+        "error_types": {}
+      },
+      "invoice_number": {
+        "correct": 9,
+        "n": 9,
+        "accuracy": 1.0,
+        "error_types": {}
+      },
+      "invoice_date": {
+        "correct": 9,
+        "n": 9,
+        "accuracy": 1.0,
+        "error_types": {}
+      },
+      "currency": {
+        "correct": 9,
+        "n": 9,
+        "accuracy": 1.0,
+        "error_types": {}
+      },
+      "line_items": {
+        "correct": 8,
+        "n": 9,
+        "accuracy": 0.8888888888888888,
+        "error_types": {
+          "wrong_value": 1
+        }
+      },
+      "tax_total": {
+        "correct": 7,
+        "n": 9,
+        "accuracy": 0.7777777777777778,
+        "error_types": {
+          "wrong_value": 2
+        }
+      },
+      "total": {
+        "correct": 9,
+        "n": 9,
+        "accuracy": 1.0,
+        "error_types": {}
+      },
+      "doc_exact": {
+        "correct": 6,
+        "n": 9,
+        "accuracy": 0.6666666666666666,
+        "error_types": {}
+      }
+    },
+    "line_items_item_level": {
+      "matched": 65,
+      "n_gt": 66,
+      "n_pred": 66,
+      "precision": 0.9848484848484849,
+      "recall": 0.9848484848484849,
+      "f1": 0.9848484848484849
+    },
+    "non_invoice_nulls": {
+      "correct": 1,
+      "n": 1
+    },
+    "cost": {
+      "docs": 10,
+      "tokens_in": 32963,
+      "tokens_out": 3384,
+      "tokens_thinking": 0,
+      "cost_usd": 0.0399064,
+      "avg_cost_usd": 0.00399064,
+      "billing_plan": "free"
+    },
+    "review_flag": {
+      "flagged_with_error": 2,
+      "flagged_no_error": 0,
+      "unflagged_with_error": 1,
+      "unflagged_no_error": 7,
+      "precision": 1.0,
+      "recall": 0.6666666666666666,
+      "field_errors": 3,
+      "field_errors_in_flagged_docs": 2,
+      "share_of_errors_flagged": 0.6666666666666666
+    }
+  },
+  "docs": [
+    {
+      "doc": "L01",
+      "input_kind": "pdf_text",
+      "needs_review": false,
+      "review_reasons": [],
+      "error": null,
+      "gt": {
+        "is_invoice": true,
+        "vendor": "Northwind Logistics Ltd",
+        "invoice_number": "NWL-88213",
+        "invoice_date": "2026-04-08",
+        "currency": "GBP",
+        "line_items": [
+          {
+            "description": "Pallet freight, Manchester to Glasgow",
+            "quantity": 3,
+            "amount": 435.0
+          },
+          {
+            "description": "Fuel surcharge (flat rate)",
+            "quantity": 1,
+            "amount": 62.5
+          },
+          {
+            "description": "Warehousing, per pallet per week",
+            "quantity": 12,
+            "amount": 57.0
+          },
+          {
+            "description": "Proof-of-delivery admin fee",
+            "quantity": 3,
+            "amount": 15.0
+          }
+        ],
+        "tax_total": 113.9,
+        "total": 683.4
+      },
+      "pred": {
+        "is_invoice": true,
+        "vendor": "Northwind Logistics Ltd",
+        "invoice_number": "NWL-88213",
+        "invoice_date": "2026-04-08",
+        "currency": "GBP",
+        "line_items": [
+          {
+            "description": "Pallet freight, Manchester to Glasgow",
+            "quantity": 3.0,
+            "amount": 435.0
+          },
+          {
+            "description": "Fuel surcharge (flat rate)",
+            "quantity": 1.0,
+            "amount": 62.5
+          },
+          {
+            "description": "Warehousing, per pallet per week",
+            "quantity": 12.0,
+            "amount": 57.0
+          },
+          {
+            "description": "Proof-of-delivery admin fee",
+            "quantity": 3.0,
+            "amount": 15.0
+          }
+        ],
+        "tax_total": 113.9,
+        "total": 683.4,
+        "needs_review": false,
+        "review_reasons": []
+      },
+      "meta": {
+        "file": "L01.pdf",
+        "input_kind": "pdf_text",
+        "model": "qwen/qwen3.8-27b",
+        "prompt_version": "v1",
+        "attempts": 1,
+        "latency_s": 1.67,
+        "tokens_in": 2387,
+        "tokens_out": 186,
+        "tokens_thinking": 0,
+        "cost_usd": 0.0026536,
+        "validation": {
+          "schema_ok": true,
+          "totals_ok": true,
+          "errors": []
+        },
+        "attempt_errors": [
+          []
+        ],
+        "error": null
+      },
+      "fields": {
+        "is_invoice": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": true,
+          "pred_norm": true,
+          "details": {}
+        },
+        "vendor": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "northwind logistics",
+          "pred_norm": "northwind logistics",
+          "details": {
+            "fuzz": 100.0
+          }
+        },
+        "invoice_number": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "NWL88213",
+          "pred_norm": "NWL88213",
+          "details": {}
+        },
+        "invoice_date": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "2026-04-08",
+          "pred_norm": "2026-04-08",
+          "details": {}
+        },
+        "currency": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "GBP",
+          "pred_norm": "GBP",
+          "details": {}
+        },
+        "line_items": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": 4,
+          "pred_norm": 4,
+          "details": {
+            "matched": 4,
+            "n_gt": 4,
+            "n_pred": 4,
+            "pairs": [
+              {
+                "gt": 0,
+                "pred": 0,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 1,
+                "pred": 1,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 2,
+                "pred": 2,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 3,
+                "pred": 3,
+                "match": true,
+                "desc_sim": 100.0
+              }
+            ],
+            "unmatched_gt": [],
+            "unmatched_pred": []
+          }
+        },
+        "tax_total": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": 113.9,
+          "pred_norm": 113.9,
+          "details": {}
+        },
+        "total": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": 683.4,
+          "pred_norm": 683.4,
+          "details": {}
+        },
+        "doc_exact": {
+          "correct": true
+        }
+      }
+    },
+    {
+      "doc": "L02",
+      "input_kind": "image",
+      "needs_review": false,
+      "review_reasons": [],
+      "error": null,
+      "gt": {
+        "is_invoice": true,
+        "vendor": "Shree Ganesh Stationers",
+        "invoice_number": "SGS/1847",
+        "invoice_date": "2026-08-19",
+        "currency": "INR",
+        "line_items": [
+          {
+            "description": "Exam pad A4 (200 pages)",
+            "quantity": 150,
+            "amount": 8700.0
+          },
+          {
+            "description": "Ball pen blue (box of 50)",
+            "quantity": 20,
+            "amount": 4800.0
+          },
+          {
+            "description": "Whiteboard duster",
+            "quantity": 10,
+            "amount": 350.0
+          },
+          {
+            "description": "Chart paper white (pack of 20)",
+            "quantity": 25,
+            "amount": 3000.0
+          },
+          {
+            "description": "Stapler pin No.10 (box)",
+            "quantity": 40,
+            "amount": 560.0
+          },
+          {
+            "description": "File folder, plastic",
+            "quantity": 100,
+            "amount": 2200.0
+          }
+        ],
+        "tax_total": 3529.8,
+        "total": 23139.8
+      },
+      "pred": {
+        "is_invoice": true,
+        "vendor": "Shree Ganesh Stationers",
+        "invoice_number": "SGS/1847",
+        "invoice_date": "2026-08-19",
+        "currency": "INR",
+        "line_items": [
+          {
+            "description": "Exam pad A4 (200 pages)",
+            "quantity": 150.0,
+            "amount": 8700.0
+          },
+          {
+            "description": "Ball pen blue (box of 50)",
+            "quantity": 20.0,
+            "amount": 4800.0
+          },
+          {
+            "description": "Whiteboard duster",
+            "quantity": 10.0,
+            "amount": 350.0
+          },
+          {
+            "description": "Chart paper white (pack of 20)",
+            "quantity": 25.0,
+            "amount": 3000.0
+          },
+          {
+            "description": "Stapler pin No.10 (box)",
+            "quantity": 40.0,
+            "amount": 560.0
+          },
+          {
+            "description": "File folder, plastic",
+            "quantity": 100.0,
+            "amount": 2200.0
+          }
+        ],
+        "tax_total": 3549.8,
+        "total": 23139.8,
+        "needs_review": false,
+        "review_reasons": []
+      },
+      "meta": {
+        "file": "L02.jpg",
+        "input_kind": "image",
+        "model": "qwen/qwen3.8-27b",
+        "prompt_version": "v1",
+        "attempts": 1,
+        "latency_s": 1.63,
+        "tokens_in": 2387,
+        "tokens_out": 266,
+        "tokens_thinking": 0,
+        "cost_usd": 0.0029736,
+        "validation": {
+          "schema_ok": true,
+          "totals_ok": true,
+          "errors": []
+        },
+        "attempt_errors": [
+          []
+        ],
+        "error": null
+      },
+      "fields": {
+        "is_invoice": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": true,
+          "pred_norm": true,
+          "details": {}
+        },
+        "vendor": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "shree ganesh stationers",
+          "pred_norm": "shree ganesh stationers",
+          "details": {
+            "fuzz": 100.0
+          }
+        },
+        "invoice_number": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "SGS1847",
+          "pred_norm": "SGS1847",
+          "details": {}
+        },
+        "invoice_date": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "2026-08-19",
+          "pred_norm": "2026-08-19",
+          "details": {}
+        },
+        "currency": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "INR",
+          "pred_norm": "INR",
+          "details": {}
+        },
+        "line_items": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": 6,
+          "pred_norm": 6,
+          "details": {
+            "matched": 6,
+            "n_gt": 6,
+            "n_pred": 6,
+            "pairs": [
+              {
+                "gt": 0,
+                "pred": 0,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 1,
+                "pred": 1,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 2,
+                "pred": 2,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 3,
+                "pred": 3,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 4,
+                "pred": 4,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 5,
+                "pred": 5,
+                "match": true,
+                "desc_sim": 100.0
+              }
+            ],
+            "unmatched_gt": [],
+            "unmatched_pred": []
+          }
+        },
+        "tax_total": {
+          "correct": false,
+          "error_type": "wrong_value",
+          "gt_norm": 3529.8,
+          "pred_norm": 3549.8,
+          "details": {}
+        },
+        "total": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": 23139.8,
+          "pred_norm": 23139.8,
+          "details": {}
+        },
+        "doc_exact": {
+          "correct": false
+        }
+      }
+    },
+    {
+      "doc": "L03",
+      "input_kind": "pdf_text",
+      "needs_review": false,
+      "review_reasons": [],
+      "error": null,
+      "gt": {
+        "is_invoice": true,
+        "vendor": "Kaveri Office Mart Pvt Ltd",
+        "invoice_number": "KOM/26-27/00418",
+        "invoice_date": "2026-06-23",
+        "currency": "INR",
+        "line_items": [
+          {
+            "description": "A4 copier paper 75 GSM (ream)",
+            "quantity": 40,
+            "amount": 11560.0
+          },
+          {
+            "description": "Whiteboard markers (box of 10)",
+            "quantity": 12,
+            "amount": 2580.0
+          },
+          {
+            "description": "Ergonomic mesh office chair",
+            "quantity": 6,
+            "amount": 38700.0
+          },
+          {
+            "description": "Heavy-duty stapler",
+            "quantity": 4,
+            "amount": 1540.0
+          }
+        ],
+        "tax_total": 9788.4,
+        "total": 64168.4
+      },
+      "pred": {
+        "is_invoice": true,
+        "vendor": "Kaveri Office Mart Pvt Ltd",
+        "invoice_number": "KOM/26-27/00418",
+        "invoice_date": "2026-06-23",
+        "currency": "INR",
+        "line_items": [
+          {
+            "description": "A4 copier paper 75 GSM (ream)",
+            "quantity": 40.0,
+            "amount": 11560.0
+          },
+          {
+            "description": "Whiteboard markers (box of 10)",
+            "quantity": 12.0,
+            "amount": 2580.0
+          },
+          {
+            "description": "Ergonomic mesh office chair",
+            "quantity": 6.0,
+            "amount": 38700.0
+          },
+          {
+            "description": "Heavy-duty stapler",
+            "quantity": 4.0,
+            "amount": 1540.0
+          }
+        ],
+        "tax_total": 9788.4,
+        "total": 64168.4,
+        "needs_review": false,
+        "review_reasons": []
+      },
+      "meta": {
+        "file": "L03.pdf",
+        "input_kind": "pdf_text",
+        "model": "qwen/qwen3.8-27b",
+        "prompt_version": "v1",
+        "attempts": 1,
+        "latency_s": 1.32,
+        "tokens_in": 2387,
+        "tokens_out": 212,
+        "tokens_thinking": 0,
+        "cost_usd": 0.0027576,
+        "validation": {
+          "schema_ok": true,
+          "totals_ok": true,
+          "errors": []
+        },
+        "attempt_errors": [
+          []
+        ],
+        "error": null
+      },
+      "fields": {
+        "is_invoice": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": true,
+          "pred_norm": true,
+          "details": {}
+        },
+        "vendor": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "kaveri office mart",
+          "pred_norm": "kaveri office mart",
+          "details": {
+            "fuzz": 100.0
+          }
+        },
+        "invoice_number": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "KOM262700418",
+          "pred_norm": "KOM262700418",
+          "details": {}
+        },
+        "invoice_date": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "2026-06-23",
+          "pred_norm": "2026-06-23",
+          "details": {}
+        },
+        "currency": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "INR",
+          "pred_norm": "INR",
+          "details": {}
+        },
+        "line_items": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": 4,
+          "pred_norm": 4,
+          "details": {
+            "matched": 4,
+            "n_gt": 4,
+            "n_pred": 4,
+            "pairs": [
+              {
+                "gt": 0,
+                "pred": 0,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 1,
+                "pred": 1,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 2,
+                "pred": 2,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 3,
+                "pred": 3,
+                "match": true,
+                "desc_sim": 100.0
+              }
+            ],
+            "unmatched_gt": [],
+            "unmatched_pred": []
+          }
+        },
+        "tax_total": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": 9788.4,
+          "pred_norm": 9788.4,
+          "details": {}
+        },
+        "total": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": 64168.4,
+          "pred_norm": 64168.4,
+          "details": {}
+        },
+        "doc_exact": {
+          "correct": true
+        }
+      }
+    },
+    {
+      "doc": "L04",
+      "input_kind": "pdf_text",
+      "needs_review": false,
+      "review_reasons": [],
+      "error": null,
+      "gt": {
+        "is_invoice": true,
+        "vendor": "Meridian Print & Pack LLP",
+        "invoice_number": "MPP-2026-0207",
+        "invoice_date": "2026-02-17",
+        "currency": "INR",
+        "line_items": [
+          {
+            "description": "Corrugated box 12x9x6 in (3-ply)",
+            "quantity": 500,
+            "amount": 9250.0
+          },
+          {
+            "description": "Corrugated box 16x12x8 in (3-ply)",
+            "quantity": 400,
+            "amount": 10700.0
+          },
+          {
+            "description": "Corrugated box 20x16x12 in (5-ply)",
+            "quantity": 250,
+            "amount": 14500.0
+          },
+          {
+            "description": "Mailer box 10x8x3 in, kraft",
+            "quantity": 600,
+            "amount": 8520.0
+          },
+          {
+            "description": "Mailer box 12x10x4 in, white",
+            "quantity": 600,
+            "amount": 10740.0
+          },
+          {
+            "description": "Bubble wrap roll 1m x 100m",
+            "quantity": 30,
+            "amount": 35400.0
+          },
+          {
+            "description": "BOPP packing tape 48mm x 100m",
+            "quantity": 240,
+            "amount": 11040.0
+          },
+          {
+            "description": "BOPP packing tape 48mm x 50m, printed",
+            "quantity": 120,
+            "amount": 4740.0
+          },
+          {
+            "description": "Stretch film 500mm x 300m",
+            "quantity": 60,
+            "amount": 24600.0
+          },
+          {
+            "description": "Edge protector 50x50x3mm, 1m",
+            "quantity": 800,
+            "amount": 6240.0
+          },
+          {
+            "description": "Paper void fill roll 380mm x 300m",
+            "quantity": 24,
+            "amount": 16560.0
+          },
+          {
+            "description": "Foam sheet 2mm, 1m x 50m",
+            "quantity": 16,
+            "amount": 21200.0
+          },
+          {
+            "description": "Zip pouch 6x9 in (pack of 100)",
+            "quantity": 80,
+            "amount": 7360.0
+          },
+          {
+            "description": "Zip pouch 9x12 in (pack of 100)",
+            "quantity": 80,
+            "amount": 11040.0
+          },
+          {
+            "description": "Tamper-evident bag 12x15 in (pack of 100)",
+            "quantity": 50,
+            "amount": 10750.0
+          },
+          {
+            "description": "Thermal label roll 100x150mm",
+            "quantity": 90,
+            "amount": 15120.0
+          },
+          {
+            "description": "Barcode label A4 sheet (pack of 100)",
+            "quantity": 35,
+            "amount": 10850.0
+          },
+          {
+            "description": "Fragile sticker roll (500)",
+            "quantity": 40,
+            "amount": 5040.0
+          },
+          {
+            "description": "Corrugated divider set 12-cell",
+            "quantity": 300,
+            "amount": 6420.0
+          },
+          {
+            "description": "Carton sealing gun",
+            "quantity": 6,
+            "amount": 3840.0
+          },
+          {
+            "description": "Pallet wrap dispenser",
+            "quantity": 8,
+            "amount": 3880.0
+          },
+          {
+            "description": "Custom print setup charge",
+            "quantity": 1,
+            "amount": 4500.0
+          },
+          {
+            "description": "Die-cut tooling charge (one-time)",
+            "quantity": 1,
+            "amount": 9800.0
+          },
+          {
+            "description": "Freight, Pune to Nashik (part load)",
+            "quantity": 1,
+            "amount": 6200.0
+          }
+        ],
+        "tax_total": 32194.8,
+        "total": 300484.8
+      },
+      "pred": {
+        "is_invoice": true,
+        "vendor": "Meridian Print & Pack LLP",
+        "invoice_number": "MPP-2026-0207",
+        "invoice_date": "2026-02-17",
+        "currency": "INR",
+        "line_items": [
+          {
+            "description": "Corrugated box 12x9x6 in (3-ply)",
+            "quantity": 500.0,
+            "amount": 9250.0
+          },
+          {
+            "description": "Corrugated box 16x12x8 in (3-ply)",
+            "quantity": 400.0,
+            "amount": 10700.0
+          },
+          {
+            "description": "Corrugated box 20x16x12 in (5-ply)",
+            "quantity": 250.0,
+            "amount": 14500.0
+          },
+          {
+            "description": "Mailer box 10x8x3 in, kraft",
+            "quantity": 600.0,
+            "amount": 8520.0
+          },
+          {
+            "description": "Mailer box 12x10x4 in, white",
+            "quantity": 600.0,
+            "amount": 10740.0
+          },
+          {
+            "description": "Bubble wrap roll 1m x 100m",
+            "quantity": 30.0,
+            "amount": 35400.0
+          },
+          {
+            "description": "BOPP packing tape 48mm x 100m",
+            "quantity": 240.0,
+            "amount": 11040.0
+          },
+          {
+            "description": "BOPP packing tape 48mm x 50m, printed",
+            "quantity": 120.0,
+            "amount": 4740.0
+          },
+          {
+            "description": "Stretch film 500mm x 300m",
+            "quantity": 60.0,
+            "amount": 24600.0
+          },
+          {
+            "description": "Edge protector 50x50x3mm, 1m",
+            "quantity": 800.0,
+            "amount": 6240.0
+          },
+          {
+            "description": "Paper void fill roll 380mm x 300m",
+            "quantity": 24.0,
+            "amount": 16560.0
+          },
+          {
+            "description": "Foam sheet 2mm, 1m x 50m",
+            "quantity": 16.0,
+            "amount": 21200.0
+          },
+          {
+            "description": "Zip pouch 6x9 in (pack of 100)",
+            "quantity": 80.0,
+            "amount": 7360.0
+          },
+          {
+            "description": "Zip pouch 9x12 in (pack of 100)",
+            "quantity": 80.0,
+            "amount": 11040.0
+          },
+          {
+            "description": "Tamper-evident bag 12x15 in (pack of 100)",
+            "quantity": 50.0,
+            "amount": 10750.0
+          },
+          {
+            "description": "Thermal label roll 100x150mm",
+            "quantity": 90.0,
+            "amount": 15120.0
+          },
+          {
+            "description": "Barcode label A4 sheet (pack of 100)",
+            "quantity": 35.0,
+            "amount": 10850.0
+          },
+          {
+            "description": "Fragile sticker roll (500)",
+            "quantity": 40.0,
+            "amount": 5040.0
+          },
+          {
+            "description": "Corrugated divider set 12-cell",
+            "quantity": 300.0,
+            "amount": 6420.0
+          },
+          {
+            "description": "Carton sealing gun",
+            "quantity": 6.0,
+            "amount": 3840.0
+          },
+          {
+            "description": "Pallet wrap dispenser",
+            "quantity": 8.0,
+            "amount": 3880.0
+          },
+          {
+            "description": "Custom print setup charge",
+            "quantity": 1.0,
+            "amount": 4500.0
+          },
+          {
+            "description": "Die-cut tooling charge (one-time)",
+            "quantity": 1.0,
+            "amount": 9800.0
+          },
+          {
+            "description": "Freight, Pune to Nashik (part load)",
+            "quantity": 1.0,
+            "amount": 6200.0
+          }
+        ],
+        "tax_total": 32194.8,
+        "total": 300484.8,
+        "needs_review": false,
+        "review_reasons": []
+      },
+      "meta": {
+        "file": "L04.pdf",
+        "input_kind": "pdf_text",
+        "model": "qwen/qwen3.8-27b",
+        "prompt_version": "v1",
+        "attempts": 1,
+        "latency_s": 4.63,
+        "tokens_in": 4181,
+        "tokens_out": 907,
+        "tokens_thinking": 0,
+        "cost_usd": 0.0069728,
+        "validation": {
+          "schema_ok": true,
+          "totals_ok": true,
+          "errors": []
+        },
+        "attempt_errors": [
+          []
+        ],
+        "error": null
+      },
+      "fields": {
+        "is_invoice": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": true,
+          "pred_norm": true,
+          "details": {}
+        },
+        "vendor": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "meridian print and pack",
+          "pred_norm": "meridian print and pack",
+          "details": {
+            "fuzz": 100.0
+          }
+        },
+        "invoice_number": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "MPP20260207",
+          "pred_norm": "MPP20260207",
+          "details": {}
+        },
+        "invoice_date": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "2026-02-17",
+          "pred_norm": "2026-02-17",
+          "details": {}
+        },
+        "currency": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "INR",
+          "pred_norm": "INR",
+          "details": {}
+        },
+        "line_items": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": 24,
+          "pred_norm": 24,
+          "details": {
+            "matched": 24,
+            "n_gt": 24,
+            "n_pred": 24,
+            "pairs": [
+              {
+                "gt": 0,
+                "pred": 0,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 1,
+                "pred": 1,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 2,
+                "pred": 2,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 3,
+                "pred": 3,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 4,
+                "pred": 4,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 5,
+                "pred": 5,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 6,
+                "pred": 6,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 7,
+                "pred": 7,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 8,
+                "pred": 8,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 9,
+                "pred": 9,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 10,
+                "pred": 10,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 11,
+                "pred": 11,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 12,
+                "pred": 12,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 13,
+                "pred": 13,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 14,
+                "pred": 14,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 15,
+                "pred": 15,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 16,
+                "pred": 16,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 17,
+                "pred": 17,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 18,
+                "pred": 18,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 19,
+                "pred": 19,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 20,
+                "pred": 20,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 21,
+                "pred": 21,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 22,
+                "pred": 22,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 23,
+                "pred": 23,
+                "match": true,
+                "desc_sim": 100.0
+              }
+            ],
+            "unmatched_gt": [],
+            "unmatched_pred": []
+          }
+        },
+        "tax_total": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": 32194.8,
+          "pred_norm": 32194.8,
+          "details": {}
+        },
+        "total": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": 300484.8,
+          "pred_norm": 300484.8,
+          "details": {}
+        },
+        "doc_exact": {
+          "correct": true
+        }
+      }
+    },
+    {
+      "doc": "L05",
+      "input_kind": "pdf_text",
+      "needs_review": false,
+      "review_reasons": [],
+      "error": null,
+      "gt": {
+        "is_invoice": true,
+        "vendor": "Orbit Hardware Supplies",
+        "invoice_number": "OHS-0261-26",
+        "invoice_date": "2026-01-27",
+        "currency": "INR",
+        "line_items": [
+          {
+            "description": "Hex bolt M10 x 60 (box of 100)",
+            "quantity": 14,
+            "amount": 8960.0
+          },
+          {
+            "description": "Wood screw 2 in (box of 500)",
+            "quantity": 20,
+            "amount": 6300.0
+          },
+          {
+            "description": "Cutting disc 4 in (pack of 25)",
+            "quantity": 12,
+            "amount": 9360.0
+          },
+          {
+            "description": "Welding electrode 3.15mm (5 kg)",
+            "quantity": 18,
+            "amount": 12420.0
+          },
+          {
+            "description": "Angle grinder 850W",
+            "quantity": 3,
+            "amount": 10350.0
+          },
+          {
+            "description": "Drill bit set HSS (13 pc)",
+            "quantity": 6,
+            "amount": 6720.0
+          },
+          {
+            "description": "Safety gloves, leather (pair)",
+            "quantity": 40,
+            "amount": 3840.0
+          },
+          {
+            "description": "Spirit level 600mm",
+            "quantity": 5,
+            "amount": 2050.0
+          },
+          {
+            "description": "Measuring tape 5m",
+            "quantity": 15,
+            "amount": 2775.0
+          },
+          {
+            "description": "Anchor fastener M12 (box of 50)",
+            "quantity": 9,
+            "amount": 7830.0
+          }
+        ],
+        "tax_total": 12708.9,
+        "total": 83313.9
+      },
+      "pred": {
+        "is_invoice": true,
+        "vendor": "ORBIT HARDWARE SUPPLIES",
+        "invoice_number": "OHS-0261-26",
+        "invoice_date": "2026-01-27",
+        "currency": "INR",
+        "line_items": [
+          {
+            "description": "Hex bolt M10 x 60 (box of 100)",
+            "quantity": 14.0,
+            "amount": 8960.0
+          },
+          {
+            "description": "Wood screw 2 in (box of 500)",
+            "quantity": 20.0,
+            "amount": 6300.0
+          },
+          {
+            "description": "Cutting disc 4 in (pack of 25)",
+            "quantity": 12.0,
+            "amount": 9360.0
+          },
+          {
+            "description": "Welding electrode 3.15mm (5 kg)",
+            "quantity": 18.0,
+            "amount": 12420.0
+          },
+          {
+            "description": "Angle grinder 850W",
+            "quantity": 3.0,
+            "amount": 10350.0
+          },
+          {
+            "description": "Drill bit set HSS (13 pc)",
+            "quantity": 6.0,
+            "amount": 6720.0
+          },
+          {
+            "description": "Safety gloves, leather (pair)",
+            "quantity": 40.0,
+            "amount": 3840.0
+          },
+          {
+            "description": "Spirit level 600mm",
+            "quantity": 5.0,
+            "amount": 2050.0
+          },
+          {
+            "description": "Measuring tape 5m",
+            "quantity": 15.0,
+            "amount": 2775.0
+          },
+          {
+            "description": "Anchor fastener M12 (box of 50)",
+            "quantity": 9.0,
+            "amount": 7830.0
+          }
+        ],
+        "tax_total": 12708.9,
+        "total": 83313.9,
+        "needs_review": false,
+        "review_reasons": []
+      },
+      "meta": {
+        "file": "L05.pdf",
+        "input_kind": "pdf_text",
+        "model": "qwen/qwen3.8-27b",
+        "prompt_version": "v1",
+        "attempts": 1,
+        "latency_s": 1.66,
+        "tokens_in": 2387,
+        "tokens_out": 397,
+        "tokens_thinking": 0,
+        "cost_usd": 0.0034976,
+        "validation": {
+          "schema_ok": true,
+          "totals_ok": true,
+          "errors": []
+        },
+        "attempt_errors": [
+          []
+        ],
+        "error": null
+      },
+      "fields": {
+        "is_invoice": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": true,
+          "pred_norm": true,
+          "details": {}
+        },
+        "vendor": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "orbit hardware supplies",
+          "pred_norm": "orbit hardware supplies",
+          "details": {
+            "fuzz": 100.0
+          }
+        },
+        "invoice_number": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "OHS026126",
+          "pred_norm": "OHS026126",
+          "details": {}
+        },
+        "invoice_date": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "2026-01-27",
+          "pred_norm": "2026-01-27",
+          "details": {}
+        },
+        "currency": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "INR",
+          "pred_norm": "INR",
+          "details": {}
+        },
+        "line_items": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": 10,
+          "pred_norm": 10,
+          "details": {
+            "matched": 10,
+            "n_gt": 10,
+            "n_pred": 10,
+            "pairs": [
+              {
+                "gt": 0,
+                "pred": 0,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 1,
+                "pred": 1,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 2,
+                "pred": 2,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 3,
+                "pred": 3,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 4,
+                "pred": 4,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 5,
+                "pred": 5,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 6,
+                "pred": 6,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 7,
+                "pred": 7,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 8,
+                "pred": 8,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 9,
+                "pred": 9,
+                "match": true,
+                "desc_sim": 100.0
+              }
+            ],
+            "unmatched_gt": [],
+            "unmatched_pred": []
+          }
+        },
+        "tax_total": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": 12708.9,
+          "pred_norm": 12708.9,
+          "details": {}
+        },
+        "total": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": 83313.9,
+          "pred_norm": 83313.9,
+          "details": {}
+        },
+        "doc_exact": {
+          "correct": true
+        }
+      }
+    },
+    {
+      "doc": "L06",
+      "input_kind": "pdf_text",
+      "needs_review": false,
+      "review_reasons": [],
+      "error": null,
+      "gt": {
+        "is_invoice": true,
+        "vendor": "Anand & Rao Associates",
+        "invoice_number": "AR/2026/0093",
+        "invoice_date": "2026-05-30",
+        "currency": "INR",
+        "line_items": [
+          {
+            "description": "Monthly compliance retainer (May 2026)",
+            "quantity": null,
+            "amount": 45000.0
+          },
+          {
+            "description": "GST return filing (GSTR-1 and GSTR-3B)",
+            "quantity": 1,
+            "amount": 6500.0
+          },
+          {
+            "description": "TDS return preparation (quarterly)",
+            "quantity": 1,
+            "amount": 8000.0
+          },
+          {
+            "description": "Out-of-pocket expenses (reimbursable)",
+            "quantity": null,
+            "amount": 1240.0
+          }
+        ],
+        "tax_total": 10933.2,
+        "total": 71673.2
+      },
+      "pred": {
+        "is_invoice": true,
+        "vendor": "Anand & Rao Associates",
+        "invoice_number": "AR/2026/0093",
+        "invoice_date": "2026-05-30",
+        "currency": "INR",
+        "line_items": [
+          {
+            "description": "Monthly compliance retainer (May 2026)",
+            "quantity": null,
+            "amount": 45000.0
+          },
+          {
+            "description": "GST return filing (GSTR-1 and GSTR-3B)",
+            "quantity": 1.0,
+            "amount": 6500.0
+          },
+          {
+            "description": "TDS return preparation (quarterly)",
+            "quantity": 1.0,
+            "amount": 8000.0
+          },
+          {
+            "description": "Out-of-pocket expenses (reimbursable)",
+            "quantity": null,
+            "amount": 1240.0
+          }
+        ],
+        "tax_total": 10933.2,
+        "total": 71673.2,
+        "needs_review": false,
+        "review_reasons": []
+      },
+      "meta": {
+        "file": "L06.pdf",
+        "input_kind": "pdf_text",
+        "model": "qwen/qwen3.8-27b",
+        "prompt_version": "v1",
+        "attempts": 1,
+        "latency_s": 1.09,
+        "tokens_in": 2387,
+        "tokens_out": 215,
+        "tokens_thinking": 0,
+        "cost_usd": 0.0027696,
+        "validation": {
+          "schema_ok": true,
+          "totals_ok": true,
+          "errors": []
+        },
+        "attempt_errors": [
+          []
+        ],
+        "error": null
+      },
+      "fields": {
+        "is_invoice": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": true,
+          "pred_norm": true,
+          "details": {}
+        },
+        "vendor": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "anand and rao associates",
+          "pred_norm": "anand and rao associates",
+          "details": {
+            "fuzz": 100.0
+          }
+        },
+        "invoice_number": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "AR20260093",
+          "pred_norm": "AR20260093",
+          "details": {}
+        },
+        "invoice_date": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "2026-05-30",
+          "pred_norm": "2026-05-30",
+          "details": {}
+        },
+        "currency": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "INR",
+          "pred_norm": "INR",
+          "details": {}
+        },
+        "line_items": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": 4,
+          "pred_norm": 4,
+          "details": {
+            "matched": 4,
+            "n_gt": 4,
+            "n_pred": 4,
+            "pairs": [
+              {
+                "gt": 0,
+                "pred": 0,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 1,
+                "pred": 1,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 2,
+                "pred": 2,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 3,
+                "pred": 3,
+                "match": true,
+                "desc_sim": 100.0
+              }
+            ],
+            "unmatched_gt": [],
+            "unmatched_pred": []
+          }
+        },
+        "tax_total": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": 10933.2,
+          "pred_norm": 10933.2,
+          "details": {}
+        },
+        "total": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": 71673.2,
+          "pred_norm": 71673.2,
+          "details": {}
+        },
+        "doc_exact": {
+          "correct": true
+        }
+      }
+    },
+    {
+      "doc": "L07",
+      "input_kind": "pdf_text",
+      "needs_review": true,
+      "review_reasons": [
+        "TOTALS_MISMATCH: lines+tax=5284.13, total=4384.13"
+      ],
+      "error": null,
+      "gt": {
+        "is_invoice": true,
+        "vendor": "Pixel Harbor Studio",
+        "invoice_number": "PHS-1042",
+        "invoice_date": "2026-03-14",
+        "currency": "USD",
+        "line_items": [
+          {
+            "description": "Brand identity package",
+            "quantity": 1,
+            "amount": 3200.0
+          },
+          {
+            "description": "Social media templates (set of 12)",
+            "quantity": 1,
+            "amount": 850.0
+          },
+          {
+            "description": "Additional revision rounds",
+            "quantity": 3,
+            "amount": 450.0
+          },
+          {
+            "description": "Returning client discount (10%)",
+            "quantity": null,
+            "amount": -450.0
+          }
+        ],
+        "tax_total": 334.13,
+        "total": 4384.13
+      },
+      "pred": {
+        "is_invoice": true,
+        "vendor": "PIXEL HARBOR STUDIO",
+        "invoice_number": "PHS-1042",
+        "invoice_date": "2026-03-14",
+        "currency": "USD",
+        "line_items": [
+          {
+            "description": "Brand identity package",
+            "quantity": 1.0,
+            "amount": 3200.0
+          },
+          {
+            "description": "Social media templates (set of 12)",
+            "quantity": 1.0,
+            "amount": 850.0
+          },
+          {
+            "description": "Additional revision rounds",
+            "quantity": 3.0,
+            "amount": 450.0
+          },
+          {
+            "description": "Returning client discount (10%)",
+            "quantity": null,
+            "amount": 450.0
+          }
+        ],
+        "tax_total": 334.13,
+        "total": 4384.13,
+        "needs_review": true,
+        "review_reasons": [
+          "TOTALS_MISMATCH: lines+tax=5284.13, total=4384.13"
+        ]
+      },
+      "meta": {
+        "file": "L07.pdf",
+        "input_kind": "pdf_text",
+        "model": "qwen/qwen3.8-27b",
+        "prompt_version": "v1",
+        "attempts": 2,
+        "latency_s": 3.9,
+        "tokens_in": 4820,
+        "tokens_out": 376,
+        "tokens_thinking": 0,
+        "cost_usd": 0.00536,
+        "validation": {
+          "schema_ok": true,
+          "totals_ok": false,
+          "errors": [
+            "TOTALS_MISMATCH: lines+tax=5284.13, total=4384.13"
+          ]
+        },
+        "attempt_errors": [
+          [
+            "TOTALS_MISMATCH: lines+tax=5284.13, total=4384.13"
+          ],
+          [
+            "TOTALS_MISMATCH: lines+tax=5284.13, total=4384.13"
+          ]
+        ],
+        "error": null
+      },
+      "fields": {
+        "is_invoice": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": true,
+          "pred_norm": true,
+          "details": {}
+        },
+        "vendor": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "pixel harbor studio",
+          "pred_norm": "pixel harbor studio",
+          "details": {
+            "fuzz": 100.0
+          }
+        },
+        "invoice_number": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "PHS1042",
+          "pred_norm": "PHS1042",
+          "details": {}
+        },
+        "invoice_date": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "2026-03-14",
+          "pred_norm": "2026-03-14",
+          "details": {}
+        },
+        "currency": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "USD",
+          "pred_norm": "USD",
+          "details": {}
+        },
+        "line_items": {
+          "correct": false,
+          "error_type": "wrong_value",
+          "gt_norm": 4,
+          "pred_norm": 4,
+          "details": {
+            "matched": 3,
+            "n_gt": 4,
+            "n_pred": 4,
+            "pairs": [
+              {
+                "gt": 0,
+                "pred": 0,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 1,
+                "pred": 1,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 2,
+                "pred": 2,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 3,
+                "pred": 3,
+                "match": false,
+                "desc_sim": 100.0
+              }
+            ],
+            "unmatched_gt": [
+              3
+            ],
+            "unmatched_pred": [
+              3
+            ]
+          }
+        },
+        "tax_total": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": 334.13,
+          "pred_norm": 334.13,
+          "details": {}
+        },
+        "total": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": 4384.13,
+          "pred_norm": 4384.13,
+          "details": {}
+        },
+        "doc_exact": {
+          "correct": false
+        }
+      }
+    },
+    {
+      "doc": "L08",
+      "input_kind": "pdf_text",
+      "needs_review": false,
+      "review_reasons": [],
+      "error": null,
+      "gt": {
+        "is_invoice": false,
+        "vendor": null,
+        "invoice_number": null,
+        "invoice_date": null,
+        "currency": null,
+        "line_items": null,
+        "tax_total": null,
+        "total": null
+      },
+      "pred": {
+        "is_invoice": false,
+        "vendor": null,
+        "invoice_number": null,
+        "invoice_date": null,
+        "currency": null,
+        "line_items": null,
+        "tax_total": null,
+        "total": null,
+        "needs_review": false,
+        "review_reasons": []
+      },
+      "meta": {
+        "file": "L08.pdf",
+        "input_kind": "pdf_text",
+        "model": "qwen/qwen3.8-27b",
+        "prompt_version": "v1",
+        "attempts": 2,
+        "latency_s": 3.93,
+        "tokens_in": 4818,
+        "tokens_out": 96,
+        "tokens_thinking": 0,
+        "cost_usd": 0.0042384,
+        "validation": {
+          "schema_ok": true,
+          "totals_ok": null,
+          "errors": []
+        },
+        "attempt_errors": [
+          [
+            "SCHEMA_ERROR: <root>: Value error, is_invoice is false but these fields are not null: ['currency']"
+          ],
+          []
+        ],
+        "error": null
+      },
+      "fields": {
+        "is_invoice": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": false,
+          "pred_norm": false,
+          "details": {}
+        },
+        "non_invoice_nulls": {
+          "correct": true,
+          "filled_fields": []
+        }
+      }
+    },
+    {
+      "doc": "L09",
+      "input_kind": "pdf_scan",
+      "needs_review": false,
+      "review_reasons": [],
+      "error": null,
+      "gt": {
+        "is_invoice": true,
+        "vendor": "Coastal Fresh Seafoods",
+        "invoice_number": "CFS-4471",
+        "invoice_date": "2026-10-14",
+        "currency": "INR",
+        "line_items": [
+          {
+            "description": "King fish (seer), cleaned, kg",
+            "quantity": 12.5,
+            "amount": 11500.0
+          },
+          {
+            "description": "Tiger prawns 16/20, kg",
+            "quantity": 18,
+            "amount": 14040.0
+          },
+          {
+            "description": "Pomfret, whole, kg",
+            "quantity": 9.5,
+            "amount": 6080.0
+          },
+          {
+            "description": "Squid, cleaned, kg",
+            "quantity": 7,
+            "amount": 2870.0
+          },
+          {
+            "description": "Crab (live), kg",
+            "quantity": 11,
+            "amount": 6160.0
+          }
+        ],
+        "tax_total": 2032.5,
+        "total": 42682.5
+      },
+      "pred": {
+        "is_invoice": true,
+        "vendor": "COASTAL FRESH SEAFOODS",
+        "invoice_number": "CFS-4471",
+        "invoice_date": "2026-10-14",
+        "currency": "INR",
+        "line_items": [
+          {
+            "description": "King fish (seer), cleaned, kg",
+            "quantity": 12.5,
+            "amount": 11500.0
+          },
+          {
+            "description": "Tiger prawns 16/20, kg",
+            "quantity": 18.0,
+            "amount": 14040.0
+          },
+          {
+            "description": "Pomfret, whole, kg",
+            "quantity": 9.5,
+            "amount": 6080.0
+          },
+          {
+            "description": "Squid, cleaned, kg",
+            "quantity": 7.0,
+            "amount": 2870.0
+          },
+          {
+            "description": "Crab (live), kg",
+            "quantity": 11.0,
+            "amount": 6160.0
+          }
+        ],
+        "tax_total": 2032.5,
+        "total": 42682.5,
+        "needs_review": false,
+        "review_reasons": []
+      },
+      "meta": {
+        "file": "L09.pdf",
+        "input_kind": "pdf_scan",
+        "model": "qwen/qwen3.8-27b",
+        "prompt_version": "v1",
+        "attempts": 1,
+        "latency_s": 3.44,
+        "tokens_in": 2387,
+        "tokens_out": 247,
+        "tokens_thinking": 0,
+        "cost_usd": 0.0028976,
+        "validation": {
+          "schema_ok": true,
+          "totals_ok": true,
+          "errors": []
+        },
+        "attempt_errors": [
+          []
+        ],
+        "error": null
+      },
+      "fields": {
+        "is_invoice": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": true,
+          "pred_norm": true,
+          "details": {}
+        },
+        "vendor": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "coastal fresh seafoods",
+          "pred_norm": "coastal fresh seafoods",
+          "details": {
+            "fuzz": 100.0
+          }
+        },
+        "invoice_number": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "CFS4471",
+          "pred_norm": "CFS4471",
+          "details": {}
+        },
+        "invoice_date": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "2026-10-14",
+          "pred_norm": "2026-10-14",
+          "details": {}
+        },
+        "currency": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "INR",
+          "pred_norm": "INR",
+          "details": {}
+        },
+        "line_items": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": 5,
+          "pred_norm": 5,
+          "details": {
+            "matched": 5,
+            "n_gt": 5,
+            "n_pred": 5,
+            "pairs": [
+              {
+                "gt": 0,
+                "pred": 0,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 1,
+                "pred": 1,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 2,
+                "pred": 2,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 3,
+                "pred": 3,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 4,
+                "pred": 4,
+                "match": true,
+                "desc_sim": 100.0
+              }
+            ],
+            "unmatched_gt": [],
+            "unmatched_pred": []
+          }
+        },
+        "tax_total": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": 2032.5,
+          "pred_norm": 2032.5,
+          "details": {}
+        },
+        "total": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": 42682.5,
+          "pred_norm": 42682.5,
+          "details": {}
+        },
+        "doc_exact": {
+          "correct": true
+        }
+      }
+    },
+    {
+      "doc": "L10",
+      "input_kind": "pdf_scan",
+      "needs_review": true,
+      "review_reasons": [
+        "TOTALS_MISMATCH: lines+tax=89009.60, total=90009.60"
+      ],
+      "error": null,
+      "gt": {
+        "is_invoice": true,
+        "vendor": "Metro Auto Parts",
+        "invoice_number": "MAP/D/09-0312",
+        "invoice_date": "2026-09-03",
+        "currency": "INR",
+        "line_items": [
+          {
+            "description": "Brake pad set, front (sedan)",
+            "quantity": 8,
+            "amount": 14800.0
+          },
+          {
+            "description": "Air filter element",
+            "quantity": 12,
+            "amount": 5040.0
+          },
+          {
+            "description": "Wiper blade 20 in (pair)",
+            "quantity": 15,
+            "amount": 5700.0
+          },
+          {
+            "description": "Engine oil 5W-30, 4 L can",
+            "quantity": 20,
+            "amount": 39200.0
+          },
+          {
+            "description": "Coolant concentrate, 1 L",
+            "quantity": 18,
+            "amount": 5580.0
+          }
+        ],
+        "tax_total": 19689.6,
+        "total": 90009.6
+      },
+      "pred": {
+        "is_invoice": true,
+        "vendor": "Metro Auto Parts",
+        "invoice_number": "MAP/D/09-0312",
+        "invoice_date": "2026-09-03",
+        "currency": "INR",
+        "line_items": [
+          {
+            "description": "Brake pad set, front (sedan)",
+            "quantity": 8.0,
+            "amount": 14800.0
+          },
+          {
+            "description": "Air filter element",
+            "quantity": 12.0,
+            "amount": 5040.0
+          },
+          {
+            "description": "Wiper blade 20 in (pair)",
+            "quantity": 15.0,
+            "amount": 5700.0
+          },
+          {
+            "description": "Engine oil 5W-30, 4 L can",
+            "quantity": 20.0,
+            "amount": 39200.0
+          },
+          {
+            "description": "Coolant concentrate, 1 L",
+            "quantity": 18.0,
+            "amount": 5580.0
+          }
+        ],
+        "tax_total": 18689.6,
+        "total": 90009.6,
+        "needs_review": true,
+        "review_reasons": [
+          "TOTALS_MISMATCH: lines+tax=89009.60, total=90009.60"
+        ]
+      },
+      "meta": {
+        "file": "L10.pdf",
+        "input_kind": "pdf_scan",
+        "model": "qwen/qwen3.8-27b",
+        "prompt_version": "v1",
+        "attempts": 2,
+        "latency_s": 28.94,
+        "tokens_in": 4822,
+        "tokens_out": 482,
+        "tokens_thinking": 0,
+        "cost_usd": 0.0057856,
+        "validation": {
+          "schema_ok": true,
+          "totals_ok": false,
+          "errors": [
+            "TOTALS_MISMATCH: lines+tax=89009.60, total=90009.60"
+          ]
+        },
+        "attempt_errors": [
+          [
+            "TOTALS_MISMATCH: lines+tax=89009.60, total=90009.60"
+          ],
+          [
+            "TOTALS_MISMATCH: lines+tax=89009.60, total=90009.60"
+          ]
+        ],
+        "error": null
+      },
+      "fields": {
+        "is_invoice": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": true,
+          "pred_norm": true,
+          "details": {}
+        },
+        "vendor": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "metro auto parts",
+          "pred_norm": "metro auto parts",
+          "details": {
+            "fuzz": 100.0
+          }
+        },
+        "invoice_number": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "MAPD090312",
+          "pred_norm": "MAPD090312",
+          "details": {}
+        },
+        "invoice_date": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "2026-09-03",
+          "pred_norm": "2026-09-03",
+          "details": {}
+        },
+        "currency": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": "INR",
+          "pred_norm": "INR",
+          "details": {}
+        },
+        "line_items": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": 5,
+          "pred_norm": 5,
+          "details": {
+            "matched": 5,
+            "n_gt": 5,
+            "n_pred": 5,
+            "pairs": [
+              {
+                "gt": 0,
+                "pred": 0,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 1,
+                "pred": 1,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 2,
+                "pred": 2,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 3,
+                "pred": 3,
+                "match": true,
+                "desc_sim": 100.0
+              },
+              {
+                "gt": 4,
+                "pred": 4,
+                "match": true,
+                "desc_sim": 100.0
+              }
+            ],
+            "unmatched_gt": [],
+            "unmatched_pred": []
+          }
+        },
+        "tax_total": {
+          "correct": false,
+          "error_type": "wrong_value",
+          "gt_norm": 19689.6,
+          "pred_norm": 18689.6,
+          "details": {}
+        },
+        "total": {
+          "correct": true,
+          "error_type": null,
+          "gt_norm": 90009.6,
+          "pred_norm": 90009.6,
+          "details": {}
+        },
+        "doc_exact": {
+          "correct": false
+        }
+      }
+    }
+  ]
+}

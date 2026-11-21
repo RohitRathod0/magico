@@ -103,3 +103,17 @@ def test_aggregate_counts():
     assert a["non_invoice_nulls"] == {"correct": 1, "n": 1}
     assert a["line_items_item_level"]["f1"] == pytest.approx(1.0)
     assert a["cost"]["cost_usd"] == pytest.approx(0.006) and a["cost"]["docs"] == 2
+
+
+def test_review_flag_metrics():
+    ok = ev.score_doc(GT_INV, GT_INV)
+    bad = ev.score_doc(GT_INV, dict(GT_INV, total=1.0, tax_total=5.0))
+    docs = [{"fields": bad, "needs_review": True, "meta": None},    # flagged, has errors (2)
+            {"fields": ok, "needs_review": True, "meta": None},     # flagged, no error
+            {"fields": bad, "needs_review": False, "meta": None},   # missed (2 errors)
+            {"fields": ok, "needs_review": False, "meta": None}]    # fine
+    r = ev.review_flag_metrics(docs)
+    assert (r["flagged_with_error"], r["flagged_no_error"], r["unflagged_with_error"], r["unflagged_no_error"]) \
+        == (1, 1, 1, 1)
+    assert r["precision"] == 0.5 and r["recall"] == 0.5
+    assert r["field_errors"] == 4 and r["field_errors_in_flagged_docs"] == 2

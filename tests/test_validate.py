@@ -90,7 +90,16 @@ def test_no_line_items_skips_totals():
 
 def test_missing_total_and_vendor_flagged_not_retryable():
     e = errs(inv([100], 0, None, vendor=None))
-    assert e == ["MISSING_TOTAL", "MISSING_VENDOR"] and not is_retryable(e)
+    assert e == ["MISSING_TOTAL", "MISSING_VENDOR", "KEY_FIELDS_MISSING: vendor, total"] and not is_retryable(e)
+
+
+def test_one_key_field_missing_is_not_key_fields_flag():
+    assert errs(inv([100], 0, 100, invoice_number=None)) == []
+
+
+def test_key_fields_missing_flag():
+    e = errs(inv([100], 0, 100, invoice_number=None, invoice_date=None))
+    assert e == ["KEY_FIELDS_MISSING: invoice_number, invoice_date"] and not is_retryable(e)
 
 
 def test_json_and_schema_errors():

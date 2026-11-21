@@ -80,7 +80,38 @@ def aggregate(docs: list[dict]) -> dict:
                  "tokens_thinking": sum(mt.get("tokens_thinking") or 0 for mt in metas),
                  "cost_usd": cost, "avg_cost_usd": cost / len(metas) if metas else None,
                  "billing_plan": config.load_pricing().get("billing_plan")},
+        "review_flag": review_flag_metrics(docs),
     }
+
+
+def field_errors(fields: dict) -> int:
+    """Wrong scored fields in one doc (doc_exact excluded; non_invoice_nulls counts as one)."""
+    return sum(1 for k, v in fields.items() if k != "doc_exact" and not v["correct"])
+
+
+def review_flag_metrics(docs: list[dict]) -> dict:
+    """needs_review vs 'doc has >= 1 field error' (PRD Phase 8)."""
+    tp = fp = fn = tn = 0
+    err_total = err_in_flagged = 0
+    for d in docs:
+        n_err = field_errors(d["fields"])
+        flagged = bool(d.get("needs_review"))
+        err_total += n_err
+        err_in_flagged += n_err if flagged else 0
+        if flagged and n_err:
+            tp += 1
+        elif flagged:
+            fp += 1
+        elif n_err:
+            fn += 1
+        else:
+            tn += 1
+    return {"flagged_with_error": tp, "flagged_no_error": fp, "unflagged_with_error": fn,
+            "unflagged_no_error": tn,
+            "precision": tp / (tp + fp) if tp + fp else None,
+            "recall": tp / (tp + fn) if tp + fn else None,
+            "field_errors": err_total, "field_errors_in_flagged_docs": err_in_flagged,
+            "share_of_errors_flagged": err_in_flagged / err_total if err_total else None}
 
 
 # ---------- running ----------
@@ -172,6 +203,20 @@ def to_markdown(report: dict, title: str) -> str:
             f"- Docs: {c['docs']} · tokens in {c['tokens_in']} · out {c['tokens_out']} · "
             f"thinking {c['tokens_thinking']}",
             f"- List-price cost: total ${c['cost_usd']:.4f} · avg/doc ${c['avg_cost_usd']:.5f}{plan}", ""]
+    rf = s.get("review_flag")
+    if rf:
+        out += ["## Human-review flag (needs_review) vs actual errors", "",
+                "Does `needs_review` point at the docs that really have a wrong field? "
+                "(A doc 'has an error' if any scored field is wrong.)", "",
+                "| | has ≥1 field error | no field error |", "|---|---|---|",
+                f"| **flagged** | {rf['flagged_with_error']} | {rf['flagged_no_error']} |",
+                f"| **not flagged** | {rf['unflagged_with_error']} | {rf['unflagged_no_error']} |", "",
+                f"- Flag precision (flagged docs that really had an error): {pct(rf['precision'])}",
+                f"- Flag recall (docs with an error that were flagged): {pct(rf['recall'])}",
+                f"- Field errors sitting in flagged docs: {rf['field_errors_in_flagged_docs']}/{rf['field_errors']} "
+                f"({pct(rf['share_of_errors_flagged'])})",
+                f"- **Caveat:** n = {len(report['docs'])} docs, with only {rf['flagged_with_error'] + rf['unflagged_with_error']} "
+                "containing an error. One doc moves these rates by 10–50 points, so read them as indicative.", ""]
     return "\n".join(out)
 
 
@@ -205,6 +250,29 @@ def print_console(report: dict) -> None:
     console.print(f"tokens in={c['tokens_in']} out={c['tokens_out']} thinking={c['tokens_thinking']} · "
                   f"list-price cost ${c['cost_usd']:.4f}, avg/doc ${c['avg_cost_usd']:.5f}{plan} · "
                   f"model {report['model']} · prompt {report['prompt_version']}")
+    rf = s.get("review_flag")
+    if rf:
+        console.print(f"needs_review: flagged&error={rf['flagged_with_error']} flagged&ok={rf['flagged_no_error']} "
+                      f"missed={rf['unflagged_with_error']} ok={rf['unflagged_no_error']} · "
+                      f"precision {pct(rf['precision'])}, recall {pct(rf['recall'])}, "
+                      f"errors in flagged docs {rf['field_errors_in_flagged_docs']}/{rf['field_errors']} "
+                      f"(small sample, n={len(report['docs'])})")
+
+
+def rescore(json_path: Path) -> int:
+    """Recompute scores and summary for a saved run (same gt/pred, current matching + metrics)."""
+    report = json.loads(json_path.read_text(encoding="utf-8"))
+    for d in report["docs"]:
+        d["fields"] = score_doc(d["gt"], d["pred"])
+    report["summary"] = aggregate(report["docs"])
+    print_console(report)
+    json_path.write_text(json.dumps(report, indent=2, ensure_ascii=False, default=str) + "\n", encoding="utf-8")
+    md_path = json_path.with_suffix(".md")
+    mode = report.get("mode", "vision")
+    title = f"Eval results: prompt {report['prompt_version']}" + (" (TEXT-ONLY input)" if mode == "text" else "")
+    md_path.write_text(to_markdown(report, title), encoding="utf-8")
+    console.print(f"[dim]rescored {json_path} and wrote {md_path}[/dim]")
+    return 0
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -216,8 +284,14 @@ def main(argv: list[str] | None = None) -> int:
                                   "the JSON is written next to it with the same name")
     ap.add_argument("--mode", choices=["vision", "text"], default="vision",
                     help="text = PDF text layer only (experiment); its outputs go to reports/text_only_outputs/")
+    ap.add_argument("--rescore", metavar="EVAL_JSON",
+                    help="re-score a saved eval JSON from its stored gt/pred (no API, no outputs/ needed) and "
+                         "rewrite it plus its .md, e.g. reports/eval_results_v1.json")
     a = ap.parse_args(argv)
     sys.stdout.reconfigure(encoding="utf-8")
+
+    if a.rescore:
+        return rescore(Path(a.rescore))
 
     outputs = Path(a.outputs)
     if a.mode == "text" and a.outputs == str(config.OUTPUTS_DIR):

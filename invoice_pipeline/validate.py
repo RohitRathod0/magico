@@ -2,7 +2,13 @@
 
 Error codes:
   JSON_PARSE_ERROR, SCHEMA_ERROR, TOTALS_MISMATCH   -> trigger one repair retry
-  LINE_AMOUNT_MISSING, MISSING_TOTAL, MISSING_VENDOR -> flag for review only
+  LINE_AMOUNT_MISSING, MISSING_TOTAL, MISSING_VENDOR,
+  KEY_FIELDS_MISSING (invoice with >= 2 of vendor/number/date/total null) -> flag for review only
+
+needs_review is rule-based by design (cheap, explainable). A doc is flagged if any of these
+remain after the repair retry, or if extraction failed (error envelope). A scan/photo with a
+totals mismatch is already flagged by TOTALS_MISMATCH. Preflight warnings: none are defined
+(preflight either passes or rejects), so nothing extra is needed for that trigger.
 """
 from __future__ import annotations
 
@@ -62,6 +68,13 @@ def check_required(inv: InvoiceExtraction) -> list[str]:
         errors.append("MISSING_TOTAL")
     if inv.vendor is None:
         errors.append("MISSING_VENDOR")
+    # Review flag (PRD Phase 8): an "invoice" missing most of its key fields is suspicious
+    # (possibly a misclassified non-invoice or an unreadable page).
+    key = {"vendor": inv.vendor, "invoice_number": inv.invoice_number,
+           "invoice_date": inv.invoice_date, "total": inv.total}
+    missing = [k for k, v in key.items() if v is None]
+    if len(missing) >= 2:
+        errors.append(f"KEY_FIELDS_MISSING: {', '.join(missing)}")
     return errors
 
 
