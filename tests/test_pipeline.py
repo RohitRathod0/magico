@@ -225,3 +225,24 @@ def test_vision_prompt_unchanged_by_text_mode(fake_llm, pdf_file):
     fake = fake_llm(INVOICE_JSON)
     extract_document(pdf_file)
     assert fake.calls[0]["prompt"] == SYSTEM_PROMPT
+
+
+def _ok_reply():
+    return type("R", (), {
+        "choices": [type("C", (), {"message": type("M", (), {"content": json.dumps(INVOICE_JSON)})()})()],
+        "usage": type("U", (), {"prompt_tokens": 1800, "completion_tokens": 150,
+                                "completion_tokens_details": None})()})()
+
+
+def test_rate_limit_keeps_waiting_past_three_attempts(monkeypatch, pdf_file):
+    comp = FakeCompletions([_rate_limit("5")] * 6, _ok_reply())
+    sleeps = _install_client(monkeypatch, comp)
+    out, _ = extract_document(pdf_file)
+    assert comp.n == 7 and sleeps == [6.0] * 6 and out["total"] == 118.0
+
+
+def test_rate_limit_gives_up_after_budget(monkeypatch, pdf_file):
+    comp = FakeCompletions([_rate_limit("5")] * llm.MAX_RATE_LIMIT_ATTEMPTS)
+    _install_client(monkeypatch, comp)
+    out, _ = extract_document(pdf_file)
+    assert comp.n == llm.MAX_RATE_LIMIT_ATTEMPTS and out["error"]["code"] == "LLM_UNAVAILABLE"

@@ -2,9 +2,10 @@
 
 call_model(images, prompt) -> (text, usage)
 
-Transport errors (timeout, connection, 429, 5xx) are retried by tenacity: up to
-MAX_TRANSPORT_ATTEMPTS attempts. On 429 we wait as long as Groq asks (the free plan
-has a 7,000 input-tokens/minute limit); otherwise exponential backoff.
+Transport errors are retried by tenacity:
+  - timeout / connection / 5xx: up to MAX_TRANSPORT_ATTEMPTS, exponential backoff
+  - 429 rate limit: up to MAX_RATE_LIMIT_ATTEMPTS, each time waiting as long as Groq
+    asks (the free plan has a 7,000 input-tokens/minute limit that resets every minute)
 After the last failure the exception propagates and pipeline.py maps it to LLM_UNAVAILABLE.
 """
 from __future__ import annotations
@@ -16,12 +17,13 @@ import time
 
 import groq
 from groq import Groq
-from tenacity import Retrying, retry_if_exception, stop_after_attempt
+from tenacity import Retrying, retry_if_exception
 
 from . import config
 from .schema import response_json_schema
 
-MAX_TRANSPORT_ATTEMPTS = 3
+MAX_TRANSPORT_ATTEMPTS = 3        # timeouts, connection errors, 5xx (PRD §5.3)
+MAX_RATE_LIMIT_ATTEMPTS = 10      # 429s: keep waiting for the per-minute window to reset
 MAX_WAIT_S = 60.0
 _sleep = time.sleep  # patched in tests
 _TRY_AGAIN_RE = re.compile(r"try again in ([\d.]+)s")
@@ -78,11 +80,21 @@ def retry_wait_seconds(exc: BaseException | None, attempt: int) -> float:
     return min(2.0 ** attempt, MAX_WAIT_S)  # 2s, 4s, ...
 
 
+def _max_attempts(exc: BaseException | None) -> int:
+    return MAX_RATE_LIMIT_ATTEMPTS if isinstance(exc, groq.RateLimitError) else MAX_TRANSPORT_ATTEMPTS
+
+
+def _stop(retry_state) -> bool:
+    """Rate limits are a 'wait and try again' signal, not an outage, so they get a larger budget."""
+    exc = retry_state.outcome.exception() if retry_state.outcome else None
+    return retry_state.attempt_number >= _max_attempts(exc)
+
+
 def _wait(retry_state) -> float:
     exc = retry_state.outcome.exception() if retry_state.outcome else None
     secs = retry_wait_seconds(exc, retry_state.attempt_number)
     print(f"[llm] {type(exc).__name__}; retry {retry_state.attempt_number}/"
-          f"{MAX_TRANSPORT_ATTEMPTS - 1} in {secs:.1f}s", file=sys.stderr)
+          f"{_max_attempts(exc) - 1} in {secs:.1f}s", file=sys.stderr)
     return secs
 
 
@@ -93,7 +105,7 @@ def call_model(images: list[tuple[bytes, str]], prompt: str, *, model: str | Non
         b64 = base64.b64encode(data).decode("ascii")
         content.append({"type": "image_url", "image_url": {"url": f"data:{mime};base64,{b64}"}})
 
-    retrying = Retrying(stop=stop_after_attempt(MAX_TRANSPORT_ATTEMPTS), wait=_wait,
+    retrying = Retrying(stop=_stop, wait=_wait,
                         retry=retry_if_exception(is_transient), sleep=_sleep, reraise=True)
     resp = retrying(
         _get_client().chat.completions.create,
