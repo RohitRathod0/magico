@@ -4,7 +4,7 @@
   "model": "qwen/qwen3.8-27b",
   "prompt_version": "v1",
   "attempts": 2,
-  "latency_s": 3.58,
+  "latency_s": 3.93,
   "tokens_in": 4818,
   "tokens_out": 96,
   "tokens_thinking": 0,
@@ -14,5 +14,11 @@
     "totals_ok": null,
     "errors": []
   },
+  "attempt_errors": [
+    [
+      "SCHEMA_ERROR: <root>: Value error, is_invoice is false but these fields are not null: ['currency']"
+    ],
+    []
+  ],
   "error": null
 }

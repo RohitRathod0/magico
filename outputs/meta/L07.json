@@ -4,7 +4,7 @@
   "model": "qwen/qwen3.8-27b",
   "prompt_version": "v1",
   "attempts": 2,
-  "latency_s": 26.06,
+  "latency_s": 3.9,
   "tokens_in": 4820,
   "tokens_out": 376,
   "tokens_thinking": 0,
@@ -16,5 +16,13 @@
       "TOTALS_MISMATCH: lines+tax=5284.13, total=4384.13"
     ]
   },
+  "attempt_errors": [
+    [
+      "TOTALS_MISMATCH: lines+tax=5284.13, total=4384.13"
+    ],
+    [
+      "TOTALS_MISMATCH: lines+tax=5284.13, total=4384.13"
+    ]
+  ],
   "error": null
 }

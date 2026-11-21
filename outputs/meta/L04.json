@@ -4,7 +4,7 @@
   "model": "qwen/qwen3.8-27b",
   "prompt_version": "v1",
   "attempts": 1,
-  "latency_s": 3.31,
+  "latency_s": 4.63,
   "tokens_in": 4181,
   "tokens_out": 907,
   "tokens_thinking": 0,
@@ -14,5 +14,8 @@
     "totals_ok": true,
     "errors": []
   },
+  "attempt_errors": [
+    []
+  ],
   "error": null
 }
