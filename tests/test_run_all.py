@@ -80,3 +80,10 @@ def test_quota_stops_run_and_keeps_good_output(tmp_path, pdf_file, monkeypatch):
     assert calls == ["L01"]                                   # stopped after the first quota error
     assert json.loads((out / "L01.json").read_text()) == good  # good output not overwritten
     assert not (out / "L02.json").exists()
+
+
+def test_was_unavailable():
+    assert run_all.was_unavailable({"error": {"code": "LLM_UNAVAILABLE", "message": ""}})
+    assert run_all.was_unavailable({"review_reasons": ["TOTALS_MISMATCH: x", "LLM_UNAVAILABLE on repair: RateLimitError"]})
+    assert not run_all.was_unavailable({"review_reasons": ["TOTALS_MISMATCH: x"]})
+    assert not run_all.was_unavailable({"error": {"code": "CORRUPT_PDF", "message": ""}})

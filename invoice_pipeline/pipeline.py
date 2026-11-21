@@ -9,6 +9,7 @@ file -> preflight -> render -> LLM -> parse -> schema -> business checks
 """
 from __future__ import annotations
 
+import re
 import time
 from pathlib import Path
 
@@ -21,6 +22,14 @@ from .schema import FIELDS
 from .validate import is_retryable, validate
 
 MAX_LLM_ATTEMPTS = 2  # first try + one repair retry
+
+
+_ORG_RE = re.compile(r"org_[A-Za-z0-9]+")
+
+
+def redact(message: str) -> str:
+    """Groq error messages include the account's organisation id; never write it to outputs."""
+    return _ORG_RE.sub("org_REDACTED", message)
 
 
 def error_envelope(code: str, message: str) -> dict:
@@ -82,7 +91,7 @@ def extract_document(path: str | Path, mode: str = "vision") -> tuple[dict, dict
             if best is not None:  # repair call failed: fall back to the earlier valid attempt
                 best_errors = best_errors + [f"LLM_UNAVAILABLE on repair: {type(e).__name__}"]
                 break
-            return fail("LLM_UNAVAILABLE", f"{type(e).__name__}: {e}")
+            return fail("LLM_UNAVAILABLE", redact(f"{type(e).__name__}: {e}"))
         usages.append(usage)
 
         inv, errors = validate(text)

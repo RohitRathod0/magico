@@ -83,6 +83,13 @@ def status_of(out: dict) -> str:
     return "needs_review" if out.get("needs_review") else "ok"
 
 
+def was_unavailable(out: dict) -> bool:
+    """The saved output is incomplete because the model was unreachable (first call or repair call)."""
+    if (out.get("error") or {}).get("code") == "LLM_UNAVAILABLE":
+        return True
+    return any(r.startswith("LLM_UNAVAILABLE") for r in out.get("review_reasons") or [])
+
+
 class DailyQuotaExhausted(Exception):
     pass
 
@@ -121,7 +128,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--force", action="store_true", help="re-run docs that already have outputs")
     ap.add_argument("--only", nargs="*", help="doc stems to run, e.g. L01 U05")
     ap.add_argument("--retry-errors", action="store_true",
-                    help="re-run only docs whose saved output is an LLM_UNAVAILABLE error")
+                    help="re-run only docs whose saved output is incomplete because the model was unavailable")
     ap.add_argument("--itpm", type=int, default=6000, help="input tokens/minute budget (0 = no pacing)")
     a = ap.parse_args(argv)
 
@@ -142,7 +149,7 @@ def main(argv: list[str] | None = None) -> int:
         if out_path.exists() and meta_path.exists():
             cached = (json.loads(out_path.read_text(encoding="utf-8")),
                       json.loads(meta_path.read_text(encoding="utf-8")))
-        unavailable = bool(cached) and (cached[0].get("error") or {}).get("code") == "LLM_UNAVAILABLE"
+        unavailable = bool(cached) and was_unavailable(cached[0])
         skip = cached and not a.force and not (a.retry_errors and unavailable)
         if skip or quota_msg:
             if cached:

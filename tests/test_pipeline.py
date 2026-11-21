@@ -280,3 +280,12 @@ def test_daily_quota_short_wait_is_retried(monkeypatch, pdf_file):
     sleeps = _install_client(monkeypatch, comp)
     out, _ = extract_document(pdf_file)
     assert comp.n == 2 and sleeps == [pytest.approx(60.6)] and out["total"] == 118.0
+
+
+def test_org_id_redacted_from_errors(monkeypatch, pdf_file):
+    req = httpx.Request("POST", "https://api.groq.com")
+    exc = groq.RateLimitError("Rate limit in organization `org_01abcxyz` on tokens per day (TPD). "
+                              "Please try again in 10m1s.", response=httpx.Response(429, request=req), body=None)
+    _install_client(monkeypatch, FakeCompletions([exc]))
+    out, meta = extract_document(pdf_file)
+    assert "org_01abcxyz" not in json.dumps(out) + json.dumps(meta) and "org_REDACTED" in out["error"]["message"]
