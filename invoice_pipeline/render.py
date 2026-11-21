@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import io
 
+import pdfplumber
 import pypdfium2 as pdfium
 
 from . import config
@@ -30,3 +31,11 @@ def to_images(data: bytes, mime: str) -> list[tuple[bytes, str]]:
     if mime == "application/pdf":
         return render_pdf(data)
     return [(data, mime)]
+
+
+def extract_text(data: bytes, mime: str) -> str:
+    """Text layer of a PDF via pdfplumber. Images (and scanned PDFs) give ''. Text mode only."""
+    if mime != "application/pdf":
+        return ""
+    with pdfplumber.open(io.BytesIO(data)) as pdf:
+        return "\n\n".join((page.extract_text() or "") for page in pdf.pages).strip()

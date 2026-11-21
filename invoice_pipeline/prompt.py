@@ -40,5 +40,18 @@ Your previous output failed these checks:
 Re-read the document and return corrected JSON."""
 
 
-def repair_prompt(errors: list[str]) -> str:
-    return REPAIR_TEMPLATE.format(system=SYSTEM_PROMPT, errors="\n".join(f"- {e}" for e in errors))
+# Text-only mode (the "thing that didn't work" experiment): same rules, the document
+# arrives as text extracted from the PDF instead of page images.
+_VISION_INTRO = "The attached image(s) are the pages of ONE document, in order."
+_TEXT_INTRO = ("The text below was extracted from ONE document (layout may be lost; it may be empty "
+               "if the document had no text layer).")
+assert _VISION_INTRO in SYSTEM_PROMPT
+
+
+def text_mode_prompt(doc_text: str) -> str:
+    return (SYSTEM_PROMPT.replace(_VISION_INTRO, _TEXT_INTRO)
+            + f"\n\nDOCUMENT TEXT:\n<<<\n{doc_text}\n>>>")
+
+
+def repair_prompt(errors: list[str], system: str = SYSTEM_PROMPT) -> str:
+    return REPAIR_TEMPLATE.format(system=system, errors="\n".join(f"- {e}" for e in errors))

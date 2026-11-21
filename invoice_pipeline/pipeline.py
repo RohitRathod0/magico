@@ -15,8 +15,8 @@ from pathlib import Path
 from . import config, llm
 from .cost import sum_usage, usage_cost
 from .preflight import InputError, input_kind, preflight
-from .prompt import PROMPT_VERSION, SYSTEM_PROMPT, repair_prompt
-from .render import to_images
+from .prompt import PROMPT_VERSION, SYSTEM_PROMPT, repair_prompt, text_mode_prompt
+from .render import extract_text, to_images
 from .schema import FIELDS
 from .validate import is_retryable, validate
 
@@ -29,11 +29,17 @@ def error_envelope(code: str, message: str) -> dict:
         "needs_review": True, "review_reasons": [code], "error": {"code": code, "message": message}}
 
 
-def extract_document(path: str | Path) -> tuple[dict, dict]:
+MODES = ("vision", "text")
+
+
+def extract_document(path: str | Path, mode: str = "vision") -> tuple[dict, dict]:
+    """mode='vision' (default): page images. mode='text': PDF text layer only (Phase 6 experiment)."""
+    if mode not in MODES:
+        raise ValueError(f"mode must be one of {MODES}")
     path = Path(path)
     t0 = time.perf_counter()
     usages: list[dict] = []
-    meta = {"file": path.name, "input_kind": None, "model": config.GROQ_MODEL, "prompt_version": PROMPT_VERSION,
+    meta = {"file": path.name, "mode": mode, "input_kind": None, "model": config.GROQ_MODEL, "prompt_version": PROMPT_VERSION,
             "attempts": 0, "latency_s": None, "tokens_in": 0, "tokens_out": 0, "tokens_thinking": 0,
             "cost_usd": 0.0, "validation": {"schema_ok": False, "totals_ok": None, "errors": []},
             "attempt_errors": [], "error": None}
@@ -54,8 +60,13 @@ def extract_document(path: str | Path) -> tuple[dict, dict]:
         data, mime = preflight(path)
         meta["input_kind"] = input_kind(data, mime)
         try:
-            images = to_images(data, mime)
-        except Exception as e:  # pypdf accepted it but the renderer could not draw it
+            if mode == "vision":
+                images, system = to_images(data, mime), SYSTEM_PROMPT
+            else:
+                doc_text = extract_text(data, mime)
+                meta["text_chars"] = len(doc_text)
+                images, system = [], text_mode_prompt(doc_text)
+        except Exception as e:  # pypdf accepted it but the renderer could not read it
             raise InputError("CORRUPT_PDF", f"PDF could not be rendered: {type(e).__name__}: {e}") from None
     except InputError as e:
         return fail(e.code, e.message)
@@ -63,7 +74,7 @@ def extract_document(path: str | Path) -> tuple[dict, dict]:
     # 2. LLM + validation, with one repair retry
     best, best_errors, errors = None, [], []
     for attempt in range(1, MAX_LLM_ATTEMPTS + 1):
-        prompt = SYSTEM_PROMPT if attempt == 1 else repair_prompt(errors)
+        prompt = system if attempt == 1 else repair_prompt(errors, system)
         meta["attempts"] = attempt
         try:
             text, usage = llm.call_model(images, prompt)

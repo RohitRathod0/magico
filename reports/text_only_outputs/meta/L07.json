@@ -1,0 +1,30 @@
+{
+  "file": "L07.pdf",
+  "mode": "text",
+  "input_kind": "pdf_text",
+  "model": "qwen/qwen3.8-27b",
+  "prompt_version": "v1",
+  "attempts": 2,
+  "latency_s": 1.39,
+  "tokens_in": 1852,
+  "tokens_out": 376,
+  "tokens_thinking": 0,
+  "cost_usd": 0.0029856,
+  "validation": {
+    "schema_ok": true,
+    "totals_ok": false,
+    "errors": [
+      "TOTALS_MISMATCH: lines+tax=5284.13, total=4384.13"
+    ]
+  },
+  "attempt_errors": [
+    [
+      "TOTALS_MISMATCH: lines+tax=5284.13, total=4384.13"
+    ],
+    [
+      "TOTALS_MISMATCH: lines+tax=5284.13, total=4384.13"
+    ]
+  ],
+  "error": null,
+  "text_chars": 772
+}

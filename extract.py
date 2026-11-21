@@ -27,10 +27,12 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Extract invoice fields from a PDF or image.")
     ap.add_argument("path")
     ap.add_argument("--meta", action="store_true", help="print run metadata to stderr")
+    ap.add_argument("--mode", choices=["vision", "text"], default="vision",
+                    help="vision (default): page images; text: PDF text layer only (experiment)")
     a = ap.parse_args(argv)
 
     sys.stdout.reconfigure(encoding="utf-8")  # Windows consoles default to cp1252
-    output, meta = extract_document(a.path)
+    output, meta = extract_document(a.path, mode=a.mode)
     print(json.dumps(output, indent=2, ensure_ascii=False))
     if a.meta:
         print(json.dumps(meta, indent=2), file=sys.stderr)

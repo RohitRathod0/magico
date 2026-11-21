@@ -199,3 +199,29 @@ def test_cli_corrupt_file_exit_3(fake_llm, bad_files, capsys):
     fake = fake_llm()
     assert extract.main([str(bad_files["CORRUPT_PDF"])]) == 3
     assert json.loads(capsys.readouterr().out)["error"]["code"] == "CORRUPT_PDF" and fake.calls == []
+
+
+# ---- text-only mode (experiment) ----
+
+def test_text_mode_sends_text_not_images(fake_llm, pdf_file, monkeypatch):
+    from invoice_pipeline import pipeline
+    monkeypatch.setattr(pipeline, "extract_text", lambda data, mime: "INVOICE T-1 Total 118.00")
+    fake = fake_llm(INVOICE_JSON)
+    out, meta = extract_document(pdf_file, mode="text")
+    assert fake.calls[0]["images"] == []
+    assert "DOCUMENT TEXT" in fake.calls[0]["prompt"] and "INVOICE T-1" in fake.calls[0]["prompt"]
+    assert "attached image" not in fake.calls[0]["prompt"]
+    assert meta["mode"] == "text" and meta["text_chars"] == 24 and out["total"] == 118.0
+
+
+def test_text_mode_image_has_empty_text(fake_llm, jpg_file):
+    fake = fake_llm(NON_INVOICE_JSON)
+    _, meta = extract_document(jpg_file, mode="text")
+    assert meta["text_chars"] == 0 and fake.calls[0]["images"] == []
+
+
+def test_vision_prompt_unchanged_by_text_mode(fake_llm, pdf_file):
+    from invoice_pipeline.prompt import SYSTEM_PROMPT
+    fake = fake_llm(INVOICE_JSON)
+    extract_document(pdf_file)
+    assert fake.calls[0]["prompt"] == SYSTEM_PROMPT

@@ -1,0 +1,23 @@
+{
+  "file": "L09.pdf",
+  "mode": "text",
+  "input_kind": "pdf_scan",
+  "model": "qwen/qwen3.8-27b",
+  "prompt_version": "v1",
+  "attempts": 1,
+  "latency_s": 0.29,
+  "tokens_in": 612,
+  "tokens_out": 47,
+  "tokens_thinking": 0,
+  "cost_usd": 0.0006776,
+  "validation": {
+    "schema_ok": true,
+    "totals_ok": null,
+    "errors": []
+  },
+  "attempt_errors": [
+    []
+  ],
+  "error": null,
+  "text_chars": 0
+}
