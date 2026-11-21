@@ -1,50 +1,32 @@
 """extract_document(path) -> (output_dict, meta_dict)
 
-Phase 2: happy path (sniff -> render -> LLM -> parse -> schema). No retries yet.
+file -> preflight -> render -> LLM -> parse -> schema -> business checks
+  - preflight failure: error envelope, no LLM call, $0
+  - JSON/schema/totals failure: ONE repair retry with the errors fed back
+  - still failing: keep the latest schema-valid attempt with needs_review=true and the
+    errors as review_reasons; if no attempt was schema-valid, error envelope SCHEMA_ERROR
+  - transport failure after tenacity retries: error envelope LLM_UNAVAILABLE
 """
 from __future__ import annotations
 
-import json
-import re
 import time
 from pathlib import Path
 
-from pydantic import ValidationError
-
 from . import config, llm
 from .cost import sum_usage, usage_cost
-from .preflight import sniff_mime
-from .prompt import PROMPT_VERSION, SYSTEM_PROMPT
+from .preflight import InputError, preflight
+from .prompt import PROMPT_VERSION, SYSTEM_PROMPT, repair_prompt
 from .render import to_images
-from .schema import FIELDS, InvoiceExtraction
+from .schema import FIELDS
+from .validate import is_retryable, validate
 
-THINK_RE = re.compile(r"<think>.*?</think>", re.DOTALL)
-
-
-class InputError(Exception):
-    def __init__(self, code: str, message: str):
-        super().__init__(message)
-        self.code, self.message = code, message
+MAX_LLM_ATTEMPTS = 2  # first try + one repair retry
 
 
 def error_envelope(code: str, message: str) -> dict:
     """Not a schema-valid extraction: is_invoice=None means 'could not determine'."""
     return {f: None for f in FIELDS} | {
         "needs_review": True, "review_reasons": [code], "error": {"code": code, "message": message}}
-
-
-def parse_response(text: str) -> tuple[InvoiceExtraction | None, list[str]]:
-    """Strip any reasoning text, parse JSON, validate the schema. Returns (model, errors)."""
-    cleaned = THINK_RE.sub("", text).strip()
-    try:
-        data = json.loads(cleaned)
-    except json.JSONDecodeError as e:
-        return None, [f"JSON_PARSE_ERROR: {e}"]
-    try:
-        return InvoiceExtraction.model_validate(data), []
-    except ValidationError as e:
-        msg = "; ".join(f"{'.'.join(map(str, err['loc'])) or '<root>'}: {err['msg']}" for err in e.errors())
-        return None, [f"SCHEMA_ERROR: {msg}"]
 
 
 def extract_document(path: str | Path) -> tuple[dict, dict]:
@@ -63,31 +45,49 @@ def extract_document(path: str | Path) -> tuple[dict, dict]:
         meta["latency_s"] = round(time.perf_counter() - t0, 2)
         return output, meta
 
+    def fail(code: str, message: str) -> tuple[dict, dict]:
+        meta["error"] = {"code": code, "message": message}
+        return finish(error_envelope(code, message))
+
+    # 1. Preflight + rendering (no LLM cost)
     try:
-        if not path.is_file():
-            raise InputError("FILE_NOT_FOUND", f"No such file: {path}")
-        data = path.read_bytes()
-        mime = sniff_mime(data)
-        if mime is None:
-            raise InputError("UNSUPPORTED_TYPE", "File is not a PDF, PNG, JPEG or WEBP (by content)")
-        images = to_images(data, mime)
+        data, mime = preflight(path)
+        try:
+            images = to_images(data, mime)
+        except Exception as e:  # pypdf accepted it but the renderer could not draw it
+            raise InputError("CORRUPT_PDF", f"PDF could not be rendered: {type(e).__name__}: {e}") from None
     except InputError as e:
-        meta["error"] = {"code": e.code, "message": e.message}
-        return finish(error_envelope(e.code, e.message))
+        return fail(e.code, e.message)
 
-    meta["attempts"] = 1
-    try:
-        text, usage = llm.call_model(images, SYSTEM_PROMPT)
-    except Exception as e:  # transport errors; tenacity retries are added in Phase 3
-        meta["error"] = {"code": "LLM_UNAVAILABLE", "message": f"{type(e).__name__}: {e}"}
-        return finish(error_envelope("LLM_UNAVAILABLE", meta["error"]["message"]))
-    usages.append(usage)
+    # 2. LLM + validation, with one repair retry
+    best, best_errors, errors = None, [], []
+    for attempt in range(1, MAX_LLM_ATTEMPTS + 1):
+        prompt = SYSTEM_PROMPT if attempt == 1 else repair_prompt(errors)
+        meta["attempts"] = attempt
+        try:
+            text, usage = llm.call_model(images, prompt)
+        except Exception as e:
+            if best is not None:  # repair call failed: fall back to the earlier valid attempt
+                best_errors = best_errors + [f"LLM_UNAVAILABLE on repair: {type(e).__name__}"]
+                break
+            return fail("LLM_UNAVAILABLE", f"{type(e).__name__}: {e}")
+        usages.append(usage)
 
-    model, errors = parse_response(text)
-    meta["validation"]["errors"] = errors
-    if model is None:
-        meta["error"] = {"code": "SCHEMA_ERROR", "message": "; ".join(errors)}
-        return finish(error_envelope("SCHEMA_ERROR", meta["error"]["message"]))
+        inv, errors = validate(text)
+        if inv is not None:
+            best, best_errors = inv, errors  # prefer the latest schema-valid attempt
+        if not is_retryable(errors):
+            break
 
-    meta["validation"]["schema_ok"] = True
-    return finish(model.model_dump() | {"needs_review": False, "review_reasons": []})
+    if best is None:
+        meta["validation"]["errors"] = errors
+        return fail("SCHEMA_ERROR", "; ".join(errors))
+
+    final_errors = best_errors  # the errors of the attempt we are returning
+    meta["validation"] = {
+        "schema_ok": True,
+        "totals_ok": (None if not (best.is_invoice and best.line_items and best.total is not None)
+                      else not any(e.startswith(("TOTALS_MISMATCH", "LINE_AMOUNT_MISSING")) for e in final_errors)),
+        "errors": final_errors,
+    }
+    return finish(best.model_dump() | {"needs_review": bool(final_errors), "review_reasons": final_errors})

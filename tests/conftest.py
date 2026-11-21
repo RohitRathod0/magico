@@ -39,6 +39,55 @@ def jpg_file(tmp_path):
     return p
 
 
+def _png(tmp_path, name, img):
+    p = tmp_path / name
+    img.save(p, format="PNG")
+    return p
+
+
+@pytest.fixture
+def bad_files(tmp_path):
+    """Bad inputs from PRD Phase 3, keyed by the error code each should produce."""
+    from pypdf import PdfReader, PdfWriter
+
+    good_pdf = tmp_path / "good.pdf"
+    _page().save(good_pdf, format="PDF")
+
+    truncated = tmp_path / "truncated.pdf"
+    truncated.write_bytes(good_pdf.read_bytes()[:200])
+
+    empty = tmp_path / "empty.pdf"
+    empty.write_bytes(b"")
+
+    text_as_pdf = tmp_path / "notes.pdf"
+    text_as_pdf.write_text("this is just a text file pretending to be a PDF")
+
+    w = PdfWriter()
+    w.append(PdfReader(good_pdf))
+    w.encrypt("secret")
+    encrypted = tmp_path / "locked.pdf"
+    with open(encrypted, "wb") as f:
+        w.write(f)
+
+    four_pages = tmp_path / "four.pdf"
+    _page().save(four_pages, format="PDF", save_all=True, append_images=[_page() for _ in range(3)])
+
+    corrupt_jpg = tmp_path / "broken.jpg"
+    corrupt_jpg.write_bytes(b"\xff\xd8\xff\xe0" + b"\x00garbage" * 50)
+
+    return {
+        "FILE_NOT_FOUND": tmp_path / "does_not_exist.pdf",
+        "EMPTY_FILE": empty,
+        "UNSUPPORTED_TYPE": text_as_pdf,
+        "CORRUPT_PDF": truncated,
+        "CORRUPT_PDF_encrypted": encrypted,
+        "TOO_MANY_PAGES": four_pages,
+        "CORRUPT_IMAGE": corrupt_jpg,
+        "UNREADABLE_IMAGE": _png(tmp_path, "tiny.png", _page(50, 50)),
+        "UNREADABLE_IMAGE_blank": _png(tmp_path, "blank.png", Image.new("RGB", (800, 1100), "white")),
+    }
+
+
 INVOICE_JSON = {
     "is_invoice": True, "vendor": "Test Traders", "invoice_number": "T-1",
     "invoice_date": "2026-05-01", "currency": "INR",
