@@ -1,0 +1,10 @@
+{
+  "model": "qwen/qwen3.8-27b",
+  "usd_per_1m_input": 0.80,
+  "usd_per_1m_output": 4.00,
+  "source_url": "https://console.groq.com/docs/models",
+  "checked_on": "2026-11-21",
+  "confirmed_by_user": true,
+  "billing_plan": "free",
+  "note": "List prices from the Groq models table, confirmed by the user 2026-11-21. The account is on Groq's free plan, so actual spend is $0. Reported cost_usd is the list-price cost, i.e. what this would cost on a paid plan."
+}
