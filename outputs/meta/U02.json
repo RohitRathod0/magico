@@ -1,0 +1,18 @@
+{
+  "file": "U02.jpg",
+  "input_kind": "image",
+  "model": "qwen/qwen3.8-27b",
+  "prompt_version": "v1",
+  "attempts": 1,
+  "latency_s": 1.0,
+  "tokens_in": 2387,
+  "tokens_out": 232,
+  "tokens_thinking": 0,
+  "cost_usd": 0.0028376,
+  "validation": {
+    "schema_ok": true,
+    "totals_ok": true,
+    "errors": []
+  },
+  "error": null
+}

@@ -73,6 +73,18 @@ def _check_image(data: bytes) -> None:
         raise InputError("UNREADABLE_IMAGE", f"Image is nearly blank (grayscale std-dev {stddev:.1f})")
 
 
+def input_kind(data: bytes, mime: str) -> str:
+    """'pdf_text' (digital PDF), 'pdf_scan' (PDF with no text layer) or 'image'. Used for reporting."""
+    if mime != "application/pdf":
+        return "image"
+    try:
+        reader = PdfReader(io.BytesIO(data))
+        has_text = any((page.extract_text() or "").strip() for page in reader.pages)
+    except Exception:
+        return "pdf_scan"
+    return "pdf_text" if has_text else "pdf_scan"
+
+
 def preflight(path: str | Path) -> tuple[bytes, str]:
     """Return (file bytes, mime) or raise InputError."""
     path = Path(path)

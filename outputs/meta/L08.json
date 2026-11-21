@@ -1,0 +1,18 @@
+{
+  "file": "L08.pdf",
+  "input_kind": "pdf_text",
+  "model": "qwen/qwen3.8-27b",
+  "prompt_version": "v1",
+  "attempts": 2,
+  "latency_s": 3.58,
+  "tokens_in": 4818,
+  "tokens_out": 96,
+  "tokens_thinking": 0,
+  "cost_usd": 0.0042384,
+  "validation": {
+    "schema_ok": true,
+    "totals_ok": null,
+    "errors": []
+  },
+  "error": null
+}

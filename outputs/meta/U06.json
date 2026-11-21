@@ -1,0 +1,18 @@
+{
+  "file": "U06.pdf",
+  "input_kind": "pdf_text",
+  "model": "qwen/qwen3.8-27b",
+  "prompt_version": "v1",
+  "attempts": 1,
+  "latency_s": 0.93,
+  "tokens_in": 2387,
+  "tokens_out": 47,
+  "tokens_thinking": 0,
+  "cost_usd": 0.0020976,
+  "validation": {
+    "schema_ok": true,
+    "totals_ok": null,
+    "errors": []
+  },
+  "error": null
+}

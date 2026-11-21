@@ -82,6 +82,7 @@ def test_bad_json_then_success(fake_llm, pdf_file):
     out, meta = extract_document(pdf_file)
     assert meta["attempts"] == 2 and out["needs_review"] is False and out["total"] == 118.0
     assert "JSON_PARSE_ERROR" in fake.calls[1]["prompt"]  # errors were fed back
+    assert meta["attempt_errors"][0][0].startswith("JSON_PARSE_ERROR") and meta["attempt_errors"][1] == []
     assert meta["tokens_in"] == 2 * 1800  # both attempts are costed
 
 

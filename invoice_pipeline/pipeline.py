@@ -14,7 +14,7 @@ from pathlib import Path
 
 from . import config, llm
 from .cost import sum_usage, usage_cost
-from .preflight import InputError, preflight
+from .preflight import InputError, input_kind, preflight
 from .prompt import PROMPT_VERSION, SYSTEM_PROMPT, repair_prompt
 from .render import to_images
 from .schema import FIELDS
@@ -33,10 +33,10 @@ def extract_document(path: str | Path) -> tuple[dict, dict]:
     path = Path(path)
     t0 = time.perf_counter()
     usages: list[dict] = []
-    meta = {"file": path.name, "model": config.GROQ_MODEL, "prompt_version": PROMPT_VERSION,
+    meta = {"file": path.name, "input_kind": None, "model": config.GROQ_MODEL, "prompt_version": PROMPT_VERSION,
             "attempts": 0, "latency_s": None, "tokens_in": 0, "tokens_out": 0, "tokens_thinking": 0,
             "cost_usd": 0.0, "validation": {"schema_ok": False, "totals_ok": None, "errors": []},
-            "error": None}
+            "attempt_errors": [], "error": None}
 
     def finish(output: dict) -> tuple[dict, dict]:
         meta.update(sum_usage(usages))
@@ -52,6 +52,7 @@ def extract_document(path: str | Path) -> tuple[dict, dict]:
     # 1. Preflight + rendering (no LLM cost)
     try:
         data, mime = preflight(path)
+        meta["input_kind"] = input_kind(data, mime)
         try:
             images = to_images(data, mime)
         except Exception as e:  # pypdf accepted it but the renderer could not draw it
@@ -74,6 +75,7 @@ def extract_document(path: str | Path) -> tuple[dict, dict]:
         usages.append(usage)
 
         inv, errors = validate(text)
+        meta["attempt_errors"].append(errors)
         if inv is not None:
             best, best_errors = inv, errors  # prefer the latest schema-valid attempt
         if not is_retryable(errors):
