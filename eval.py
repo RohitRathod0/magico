@@ -86,17 +86,17 @@ def aggregate(docs: list[dict]) -> dict:
 # ---------- running ----------
 
 def run_extractor(docs: list[Path], out_dir: Path, mode: str = "vision") -> None:
-    from invoice_pipeline.pipeline import extract_document
-    from run_all import TokenPacer, estimate_tokens, write_json
+    from run_all import DailyQuotaExhausted, TokenPacer, process_doc
 
     pacer = TokenPacer(6000)
     for doc in docs:
-        pacer.wait_for(estimate_tokens(doc))
-        console.print(f"[dim]extracting {doc.name} ...[/dim]", highlight=False)
-        out, meta = extract_document(doc, mode=mode)
-        pacer.record(meta["tokens_in"])
-        write_json(out_dir / f"{doc.stem}.json", out)
-        write_json(out_dir / "meta" / f"{doc.stem}.json", meta)
+        try:
+            process_doc(doc, out_dir, pacer, mode)
+        except DailyQuotaExhausted as e:
+            raise SystemExit(
+                f"Stopped at {doc.stem}: Groq's daily token quota is used up, so this eval would be incomplete. "
+                f"Wait for the quota to refill, then finish with `python run_all.py --only <stems> --force` "
+                f"and score with `python eval.py --use-cached`.\n{str(e)[:300]}") from None
 
 
 def load_json(p: Path) -> dict | None:
@@ -232,7 +232,10 @@ def main(argv: list[str] | None = None) -> int:
     else:
         md_path = config.REPORTS_DIR / f"eval_results_{report['prompt_version']}.md"
         json_path = config.REPORTS_DIR / "eval_results.json"
-    json_path.write_text(json.dumps(report, indent=2, ensure_ascii=False, default=str) + "\n", encoding="utf-8")
+    payload = json.dumps(report, indent=2, ensure_ascii=False, default=str) + "\n"
+    json_path.write_text(payload, encoding="utf-8")
+    if not a.out:  # keep a per-version copy so later prompt versions never overwrite earlier results
+        (config.REPORTS_DIR / f"eval_results_{report['prompt_version']}.json").write_text(payload, encoding="utf-8")
     title = f"Eval results: prompt {report['prompt_version']}" + (" (TEXT-ONLY input)" if a.mode == "text" else "")
     md_path.write_text(to_markdown(report, title), encoding="utf-8")
     console.print(f"[dim]wrote {json_path} and {md_path}[/dim]")

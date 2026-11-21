@@ -25,9 +25,11 @@ MIN_IMAGE_SHORT_SIDE = 300
 MIN_IMAGE_STDDEV = 5.0
 PDF_RENDER_DPI = 150
 
-# Totals check tolerance: max(1.00, 0.5% of total)
+# Totals check tolerance: max(1.00, 0.05% of total).
+# v1 used 0.5%; failure analysis showed a 20.00 error on a 23,139.80 invoice slipping
+# through (tolerance 115.70), so v2 tightens it. Disclosed as tuning in REPORT.md.
 TOTALS_ABS_TOL = 1.00
-TOTALS_REL_TOL = 0.005
+TOTALS_REL_TOL = 0.0005
 
 # Data / output paths
 DATA_DIR = ROOT / "data"

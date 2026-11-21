@@ -28,6 +28,7 @@ from rich.table import Table
 
 from invoice_pipeline import config
 from invoice_pipeline.dataset import all_docs
+from invoice_pipeline.llm import is_daily_limit
 from invoice_pipeline.pipeline import extract_document
 
 EST_TOKENS_PER_PAGE = 2500  # observed ~2,390 per rendered page, plus the prompt
@@ -82,12 +83,45 @@ def status_of(out: dict) -> str:
     return "needs_review" if out.get("needs_review") else "ok"
 
 
+class DailyQuotaExhausted(Exception):
+    pass
+
+
+def process_doc(doc: Path, out_dir: Path, pacer: TokenPacer, mode: str = "vision") -> tuple[dict, dict]:
+    """Extract one doc and save it. Shared by run_all and eval.
+
+    An LLM_UNAVAILABLE result never overwrites an existing good output, and the daily-quota
+    case raises DailyQuotaExhausted so the caller stops instead of failing every remaining doc.
+    """
+    out_path, meta_path = out_dir / f"{doc.stem}.json", out_dir / "meta" / f"{doc.stem}.json"
+    pacer.wait_for(estimate_tokens(doc))
+    console.print(f"[bold]{doc.parent.name}/{doc.name}[/bold] ...", highlight=False)
+    out, meta = extract_document(doc, mode=mode)
+    pacer.record(meta["tokens_in"])
+    err = out.get("error") or {}
+    if err.get("code") == "LLM_UNAVAILABLE":
+        old = json.loads(out_path.read_text(encoding="utf-8")) if out_path.exists() else None
+        if old and not old.get("error"):
+            console.print(f"[yellow]  {doc.stem}: model unavailable; keeping the previous output[/yellow]")
+        else:
+            write_json(out_path, out)
+            write_json(meta_path, meta)
+        if is_daily_limit(err.get("message", "")):
+            raise DailyQuotaExhausted(err["message"])
+        return out, meta
+    write_json(out_path, out)
+    write_json(meta_path, meta)
+    return out, meta
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--data", default=str(config.DATA_DIR))
     ap.add_argument("--out", default=str(config.OUTPUTS_DIR))
     ap.add_argument("--force", action="store_true", help="re-run docs that already have outputs")
     ap.add_argument("--only", nargs="*", help="doc stems to run, e.g. L01 U05")
+    ap.add_argument("--retry-errors", action="store_true",
+                    help="re-run only docs whose saved output is an LLM_UNAVAILABLE error")
     ap.add_argument("--itpm", type=int, default=6000, help="input tokens/minute budget (0 = no pacing)")
     a = ap.parse_args(argv)
 
@@ -101,20 +135,29 @@ def main(argv: list[str] | None = None) -> int:
 
     pacer = TokenPacer(a.itpm)
     rows = []
+    quota_msg = None
     for doc in docs:
         out_path, meta_path = out_dir / f"{doc.stem}.json", out_dir / "meta" / f"{doc.stem}.json"
-        if out_path.exists() and meta_path.exists() and not a.force:
-            out = json.loads(out_path.read_text(encoding="utf-8"))
-            meta = json.loads(meta_path.read_text(encoding="utf-8"))
-            rows.append((doc, out, meta, "cached"))
+        cached = None
+        if out_path.exists() and meta_path.exists():
+            cached = (json.loads(out_path.read_text(encoding="utf-8")),
+                      json.loads(meta_path.read_text(encoding="utf-8")))
+        unavailable = bool(cached) and (cached[0].get("error") or {}).get("code") == "LLM_UNAVAILABLE"
+        skip = cached and not a.force and not (a.retry_errors and unavailable)
+        if skip or quota_msg:
+            if cached:
+                rows.append((doc, *cached, "cached"))
             continue
-        pacer.wait_for(estimate_tokens(doc))
-        console.print(f"[bold]{doc.parent.name}/{doc.name}[/bold] ...")
-        out, meta = extract_document(doc)
-        pacer.record(meta["tokens_in"])
-        write_json(out_path, out)
-        write_json(meta_path, meta)
+        try:
+            out, meta = process_doc(doc, out_dir, pacer)
+        except DailyQuotaExhausted as e:
+            quota_msg = str(e)
+            out, meta = (json.loads(out_path.read_text(encoding="utf-8")),
+                         json.loads(meta_path.read_text(encoding="utf-8")))
         rows.append((doc, out, meta, "run"))
+    if quota_msg:
+        console.print(f"[red]Stopped early: Groq's daily token quota is used up. Remaining docs were "
+                      f"not run. Re-run later with --retry-errors (or --force).[/red]\n[dim]{quota_msg[:300]}[/dim]")
 
     # ---- summary ----
     t = Table(title="run_all summary")

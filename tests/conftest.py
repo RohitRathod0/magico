@@ -92,10 +92,11 @@ INVOICE_JSON = {
     "is_invoice": True, "vendor": "Test Traders", "invoice_number": "T-1",
     "invoice_date": "2026-05-01", "currency": "INR",
     "line_items": [{"description": "Item A", "quantity": 2, "amount": 100.0}],
-    "tax_total": 18.0, "total": 118.0,
-}
+    "tax_lines": [{"label": "CGST @ 9%", "amount": 9.0}, {"label": "SGST @ 9%", "amount": 9.0}],
+    "total": 118.0,
+}  # model response shape (prompt v2): tax_lines, not tax_total
 NON_INVOICE_JSON = {"is_invoice": False} | {k: None for k in (
-    "vendor", "invoice_number", "invoice_date", "currency", "line_items", "tax_total", "total")}
+    "vendor", "invoice_number", "invoice_date", "currency", "line_items", "tax_lines", "total")}
 USAGE = {"tokens_in": 1800, "tokens_out": 150, "tokens_thinking": 0}
 
 

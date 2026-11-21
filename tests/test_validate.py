@@ -10,7 +10,7 @@ def inv(lines, tax, total, **over):
     d = {"is_invoice": True, "vendor": "V", "invoice_number": "1", "invoice_date": "2026-01-01",
          "currency": "INR", "line_items": [{"description": f"i{n}", "quantity": 1, "amount": a}
                                            for n, a in enumerate(lines)],
-         "tax_total": tax, "total": total} | over
+         "tax_lines": [{"label": "GST", "amount": tax}] if tax else [], "total": total} | over
     return d
 
 
@@ -40,10 +40,32 @@ def test_tolerance_abs_edge(total, ok):
     assert (errs(inv([100], 0, total)) == []) is ok
 
 
-@pytest.mark.parametrize("total,ok", [(1005.0, True), (995.1, True), (1005.2, False), (994.9, False)])
+@pytest.mark.parametrize("total,ok", [(20010.0, True), (19990.1, True), (20010.2, False), (19989.9, False)])
 def test_tolerance_relative_edge(total, ok):
-    # lines+tax = 1000; tol = 0.005*total (5.025 at 1005, 4.9755 at 995.1, 4.9745 at 994.9)
-    assert (errs(inv([1000], 0, total)) == []) is ok
+    # lines+tax = 20000; tol = 0.0005*total (10.005 at 20010, 9.995 at 19990.1, 9.995 at 19989.9)
+    assert (errs(inv([20000], 0, total)) == []) is ok
+
+
+def test_v1_l02_style_error_now_caught():
+    # A 20.00 tax error on a ~23,000 invoice passed v1's 0.5% tolerance; v2's 0.05% catches it.
+    assert errs(inv([19610], 3549.8, 23139.8))[0].startswith("TOTALS_MISMATCH")
+
+
+def test_tax_lines_are_summed_in_code():
+    d = inv([19610], 0, 23139.8)
+    d["tax_lines"] = [{"label": "CGST @ 9%", "amount": 1764.9}, {"label": "SGST @ 9%", "amount": 1764.9}]
+    m, e = validate(json.dumps(d))
+    assert e == [] and m.tax_total == 3529.8
+
+
+def test_no_tax_lines_gives_zero_tax():
+    m, e = validate(json.dumps(inv([100], 0, 100)))
+    assert e == [] and m.tax_total == 0
+
+
+def test_mismatch_message_spells_out_arithmetic():
+    e = errs(inv([3200, 850, 450, 450], 334.13, 4384.13))[0]
+    assert "line items sum to 4950.00" in e and "gap +900.00" in e
 
 
 def test_line_amount_missing_flagged():
@@ -58,7 +80,7 @@ def test_line_amount_missing_flagged():
 
 def test_non_invoice_skips_totals():
     d = {"is_invoice": False} | {k: None for k in ("vendor", "invoice_number", "invoice_date", "currency",
-                                                    "line_items", "tax_total", "total")}
+                                                    "line_items", "tax_lines", "total")}
     assert errs(d) == []
 
 

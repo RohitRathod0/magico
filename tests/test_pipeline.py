@@ -10,6 +10,7 @@ import httpx
 from invoice_pipeline import llm
 from invoice_pipeline.pipeline import extract_document
 from invoice_pipeline.validate import parse_and_validate_schema
+from invoice_pipeline.schema import FIELDS
 from tests.conftest import INVOICE_JSON, NON_INVOICE_JSON
 
 PRICING_COST = 1800 * 0.80 / 1e6 + 150 * 4.00 / 1e6
@@ -19,6 +20,7 @@ def test_clean_pdf_invoice(fake_llm, pdf_file):
     fake = fake_llm(INVOICE_JSON)
     out, meta = extract_document(pdf_file)
     assert out["vendor"] == "Test Traders" and out["needs_review"] is False and out["review_reasons"] == []
+    assert out["tax_total"] == 18.0 and "tax_lines" not in out  # tax added up in code
     # PDF was rendered to one PNG page before the call
     assert [m for _, m in fake.calls[0]["images"]] == ["image/png"]
     assert meta["attempts"] == 1 and meta["validation"]["schema_ok"] is True
@@ -42,7 +44,7 @@ def test_non_invoice(fake_llm, pdf_file):
     fake_llm(NON_INVOICE_JSON)
     out, _ = extract_document(pdf_file)
     assert out["is_invoice"] is False
-    assert all(out[k] is None for k in NON_INVOICE_JSON if k != "is_invoice")
+    assert all(out[k] is None for k in FIELDS if k != "is_invoice") and "tax_lines" not in out
 
 
 def test_think_tags_stripped():
@@ -88,8 +90,9 @@ def test_bad_json_then_success(fake_llm, pdf_file):
 
 def test_persistent_totals_mismatch_flagged(fake_llm, pdf_file):
     bad = INVOICE_JSON | {"total": 999.0}
-    fake_llm(bad, bad)
+    fake = fake_llm(bad, bad)
     out, meta = extract_document(pdf_file)
+    assert "gap" in fake.calls[1]["prompt"] and "must be negative" in fake.calls[1]["prompt"]
     assert meta["attempts"] == 2 and out["needs_review"] is True and out["total"] == 999.0
     assert out["review_reasons"][0].startswith("TOTALS_MISMATCH")
     assert meta["validation"]["totals_ok"] is False
@@ -156,7 +159,7 @@ def test_rate_limit_waits_as_asked_then_succeeds(monkeypatch, pdf_file):
     comp = FakeCompletions([_rate_limit("7")], reply)
     sleeps = _install_client(monkeypatch, comp)
     out, meta = extract_document(pdf_file)
-    assert comp.n == 2 and sleeps == [8.0] and out["total"] == 118.0 and meta["tokens_in"] == 1800
+    assert comp.n == 2 and sleeps == [21.5] and out["total"] == 118.0 and meta["tokens_in"] == 1800  # message beats header
 
 
 def test_rate_limit_wait_from_message_when_no_header():
@@ -238,7 +241,7 @@ def test_rate_limit_keeps_waiting_past_three_attempts(monkeypatch, pdf_file):
     comp = FakeCompletions([_rate_limit("5")] * 6, _ok_reply())
     sleeps = _install_client(monkeypatch, comp)
     out, _ = extract_document(pdf_file)
-    assert comp.n == 7 and sleeps == [6.0] * 6 and out["total"] == 118.0
+    assert comp.n == 7 and sleeps == [21.5] * 6 and out["total"] == 118.0
 
 
 def test_rate_limit_gives_up_after_budget(monkeypatch, pdf_file):
@@ -246,3 +249,34 @@ def test_rate_limit_gives_up_after_budget(monkeypatch, pdf_file):
     _install_client(monkeypatch, comp)
     out, _ = extract_document(pdf_file)
     assert comp.n == llm.MAX_RATE_LIMIT_ATTEMPTS and out["error"]["code"] == "LLM_UNAVAILABLE"
+
+
+# ---- daily quota ----
+
+def test_parse_groq_durations():
+    assert llm.parse_duration("10m20.784s") == pytest.approx(620.784)
+    assert llm.parse_duration("59.616s") == pytest.approx(59.616)
+    assert llm.parse_duration("1h2m3s") == pytest.approx(3723)
+    assert llm.parse_duration("250ms") == pytest.approx(0.25)
+
+
+def _daily_limit(wait="10m20.784s"):
+    req = httpx.Request("POST", "https://api.groq.com")
+    resp = httpx.Response(429, request=req)
+    return groq.RateLimitError(f"Rate limit reached ... on tokens per day (TPD): Limit 200000, Used 198605, "
+                               f"Requested 2832. Please try again in {wait}.", response=resp, body=None)
+
+
+def test_daily_quota_gives_up_immediately(monkeypatch, pdf_file):
+    comp = FakeCompletions([_daily_limit()] * 5)
+    sleeps = _install_client(monkeypatch, comp)
+    out, _ = extract_document(pdf_file)
+    assert comp.n == 1 and sleeps == [] and out["error"]["code"] == "LLM_UNAVAILABLE"
+    assert llm.is_daily_limit(out["error"]["message"])
+
+
+def test_daily_quota_short_wait_is_retried(monkeypatch, pdf_file):
+    comp = FakeCompletions([_daily_limit("59.6s")], _ok_reply())
+    sleeps = _install_client(monkeypatch, comp)
+    out, _ = extract_document(pdf_file)
+    assert comp.n == 2 and sleeps == [pytest.approx(60.6)] and out["total"] == 118.0

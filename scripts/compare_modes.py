@@ -84,7 +84,8 @@ def build(a: dict, b: dict) -> str:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--a", default=str(ROOT / "reports" / "eval_results.json"))
+    # The text-only run used prompt v1, so compare against the v1 vision run.
+    ap.add_argument("--a", default=str(ROOT / "reports" / "eval_results_v1.json"))
     ap.add_argument("--b", default=str(ROOT / "reports" / "eval_results_text_only.json"))
     ap.add_argument("--out", default=str(ROOT / "reports" / "vision_vs_text.md"))
     args = ap.parse_args()

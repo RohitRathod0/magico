@@ -248,11 +248,13 @@ def report_doc_total(report: dict, doc_id: str) -> float | None:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--eval", default=str(ROOT / "reports" / "eval_results.json"))
-    ap.add_argument("--out", default=str(ROOT / "reports" / "failures.md"))
+    ap.add_argument("--out", help="default reports/failures.md for v1, reports/failures_<version>.md otherwise")
     args = ap.parse_args()
     report = json.loads(Path(args.eval).read_text(encoding="utf-8"))
+    pv = report["prompt_version"]
+    out = Path(args.out) if args.out else ROOT / "reports" / ("failures.md" if pv == "v1" else f"failures_{pv}.md")
     md = to_markdown(report, analyse(report))
-    Path(args.out).write_text(md, encoding="utf-8")
+    out.write_text(md, encoding="utf-8")
     sys.stdout.reconfigure(encoding="utf-8")
     print(md)
     return 0
