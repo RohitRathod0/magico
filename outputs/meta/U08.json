@@ -1,18 +1,22 @@
 {
   "file": "U08.pdf",
+  "mode": "vision",
   "input_kind": "pdf_text",
   "model": "qwen/qwen3.8-27b",
-  "prompt_version": "v1",
+  "prompt_version": "v2",
   "attempts": 1,
-  "latency_s": 1.35,
-  "tokens_in": 2387,
-  "tokens_out": 200,
+  "latency_s": 2.98,
+  "tokens_in": 2439,
+  "tokens_out": 236,
   "tokens_thinking": 0,
-  "cost_usd": 0.0027096,
+  "cost_usd": 0.0028952,
   "validation": {
     "schema_ok": true,
     "totals_ok": true,
     "errors": []
   },
+  "attempt_errors": [
+    []
+  ],
   "error": null
 }

@@ -31,10 +31,8 @@
       "amount": 5580.0
     }
   ],
-  "tax_total": 18689.6,
+  "tax_total": 19689.6,
   "total": 90009.6,
-  "needs_review": true,
-  "review_reasons": [
-    "TOTALS_MISMATCH: lines+tax=89009.60, total=90009.60"
-  ]
+  "needs_review": false,
+  "review_reasons": []
 }

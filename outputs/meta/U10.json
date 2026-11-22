@@ -1,18 +1,25 @@
 {
   "file": "U10.pdf",
+  "mode": "vision",
   "input_kind": "pdf_text",
   "model": "qwen/qwen3.8-27b",
-  "prompt_version": "v1",
-  "attempts": 1,
-  "latency_s": 7.08,
-  "tokens_in": 2387,
-  "tokens_out": 47,
+  "prompt_version": "v2",
+  "attempts": 2,
+  "latency_s": 27.7,
+  "tokens_in": 4930,
+  "tokens_out": 94,
   "tokens_thinking": 0,
-  "cost_usd": 0.0020976,
+  "cost_usd": 0.00432,
   "validation": {
     "schema_ok": true,
     "totals_ok": null,
     "errors": []
   },
+  "attempt_errors": [
+    [
+      "SCHEMA_ERROR: <root>: Value error, is_invoice is false but these fields are not null: ['currency', 'line_items', 'tax_lines']"
+    ],
+    []
+  ],
   "error": null
 }

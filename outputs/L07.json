@@ -30,6 +30,6 @@
   "total": 4384.13,
   "needs_review": true,
   "review_reasons": [
-    "TOTALS_MISMATCH: lines+tax=5284.13, total=4384.13"
+    "TOTALS_MISMATCH: lines+tax=5284.13, total=4384.13 (line items sum to 4950.00, tax lines sum to 334.13, gap +900.00)"
   ]
 }

@@ -1,28 +1,22 @@
 {
   "file": "L10.pdf",
+  "mode": "vision",
   "input_kind": "pdf_scan",
   "model": "qwen/qwen3.8-27b",
-  "prompt_version": "v1",
-  "attempts": 2,
-  "latency_s": 28.94,
-  "tokens_in": 4822,
-  "tokens_out": 482,
+  "prompt_version": "v2",
+  "attempts": 1,
+  "latency_s": 3.21,
+  "tokens_in": 2439,
+  "tokens_out": 279,
   "tokens_thinking": 0,
-  "cost_usd": 0.0057856,
+  "cost_usd": 0.0030672,
   "validation": {
     "schema_ok": true,
-    "totals_ok": false,
-    "errors": [
-      "TOTALS_MISMATCH: lines+tax=89009.60, total=90009.60"
-    ]
+    "totals_ok": true,
+    "errors": []
   },
   "attempt_errors": [
-    [
-      "TOTALS_MISMATCH: lines+tax=89009.60, total=90009.60"
-    ],
-    [
-      "TOTALS_MISMATCH: lines+tax=89009.60, total=90009.60"
-    ]
+    []
   ],
   "error": null
 }

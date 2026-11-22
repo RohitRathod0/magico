@@ -1,18 +1,22 @@
 {
   "file": "U03.pdf",
+  "mode": "vision",
   "input_kind": "pdf_text",
   "model": "qwen/qwen3.8-27b",
-  "prompt_version": "v1",
+  "prompt_version": "v2",
   "attempts": 1,
-  "latency_s": 1.07,
-  "tokens_in": 2387,
-  "tokens_out": 153,
+  "latency_s": 1.26,
+  "tokens_in": 2439,
+  "tokens_out": 151,
   "tokens_thinking": 0,
-  "cost_usd": 0.0025216,
+  "cost_usd": 0.0025552,
   "validation": {
     "schema_ok": true,
     "totals_ok": true,
     "errors": []
   },
+  "attempt_errors": [
+    []
+  ],
   "error": null
 }
